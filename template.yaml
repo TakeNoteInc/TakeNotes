@@ -76,31 +76,31 @@ Resources: # aws stuff we want to provision
       UserPoolId: !Ref TodoUserPool # use our user pool made before - should be renamed
       GenerateSecret: false
       AllowedOAuthFlowsUserPoolClient: true
-      AllowedOAuthFlows: ['code', 'implicit'] # implict means we use their UI and jwt token is added to the callback url - read more https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-configuring-app-integration.html
+      AllowedOAuthFlows: ['code', 'implicit'] # implict means we get JWT token returned to us directed based on the scopes (email,phone etc) - code will return a code which we have to exchange at a token endpoint
+      CallbackURLs: ['http://localhost:3000', 'http://localhost:8080' ,'https://localhost', !Join ['', ['https://', !GetAtt AmplifyBranch.BranchName, '.', !GetAtt AmplifyApp.DefaultDomain]]] # we use their UI and jwt token is added to the callback url - read more https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-configuring-app-integration.html
                                               # code example look at how idToken is set - https://github.com/aws-samples/lambda-refarch-webapp/blob/master/www/src/App.js#L165 
-      CallbackURLs: ['http://localhost:3000', 'http://localhost:8080' ,'https://localhost', !Join ['', ['https://', !GetAtt AmplifyBranch.BranchName, '.', !GetAtt AmplifyApp.DefaultDomain]]] # for implicit flow we need to return user back to our site
       SupportedIdentityProviders: ['COGNITO']
       AllowedOAuthScopes: ['phone', 'email', 'openid']
       ExplicitAuthFlows:
       - USER_PASSWORD_AUTH
   
-  TodoDomain:
+  TodoDomain: # create domain that hosts the sign-up and sign-in pages for your application - see more https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cognito-userpooldomain.html
     Type: AWS::Cognito::UserPoolDomain
     Properties: 
       Domain: !Join ['-', [!Ref CognitoDomainName, !Ref AWS::StackName]]
-      UserPoolId: !Ref TodoUserPool
+      UserPoolId: !Ref TodoUserPool # change - link our user pool
 
-  UsersTable:
-    Type: AWS::DynamoDB::Table
+  UsersTable: # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-dynamodb-table.html
+    Type: AWS::DynamoDB::Table # create a table in dyanom - the below is the same config you would follow with code here - https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GettingStarted.NodeJs.01.html
     Properties:
-      TableName: !Join ['-', [users-table, !Ref AWS::StackName]]
+      TableName: !Join ['-', [users-table, !Ref AWS::StackName]] # we can probably just do user-table for this imo
       KeySchema:
-          - AttributeName: cognito-username
+          - AttributeName: cognito-username # change name of primary key
             KeyType: HASH
-          - AttributeName: id
+          - AttributeName: id # sort key - server used UUID pkg to generate it
             KeyType: RANGE
       AttributeDefinitions:
-          - AttributeName: cognito-username
+          - AttributeName: cognito-username # here we can define attributes - might be worth defining our notes object here
             AttributeType: S
           - AttributeName: id
             AttributeType: S
@@ -118,64 +118,64 @@ Resources: # aws stuff we want to provision
         MetricsEnabled: true
         HttpMethod: '*'
         ResourcePath: !Sub '${VersionParam}/*' # !sub is substitute - https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-sub.html
-        LoggingLevel: INFO
+        LoggingLevel: INFO 
     AccessLogSetting:
       DestinationArn: !Sub 'arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${ApiAccessLogGroup}'
       Format: '$context.identity.sourceIp $context.authorizer.claims.sub [$context.requestTime] "$context.httpMethod $context.resourcePath $context.protocol" $context.status $context.requestId $context.awsEndpointRequestId $context.xrayTraceId $context.responseLatency $context.integrationLatency "$context.error.message"'
     Properties:
-      Name: TodoApi
-      StageName: !Ref StageNameParam
+      Name: TodoApi # change
+      StageName: !Ref StageNameParam 
       TracingEnabled: true
       Cors:
         AllowOrigin: "'*'"
         AllowMethods: "'OPTIONS,HEAD,GET,PUT,POST,DELETE'"
         AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-      Auth:
+      Auth: #  - https://github.com/aws/serverless-application-model/blob/master/versions/2016-10-31.md#api-auth-object
         Authorizers:
           CognitoAuthorizer:
-            UserPoolArn: !GetAtt "TodoUserPool.Arn"
+            UserPoolArn: !GetAtt "TodoUserPool.Arn" # update this to link correct userpool id
 
   # API Functions
   GetTodoFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties: # function is run with default IAM role created 
-      CodeUri: todo-src/getTodo # relative url in folder
-      Handler: app.getToDoItem 
+      CodeUri: todo-src/getTodo # relative url in folder and also update this
+      Handler: app.getToDoItem  # updaet this
       Tracing: Active
       Policies: # policies determine what we can access - if we create an IAM role we can reference that
         - DynamoDBReadPolicy:
-            TableName: !Ref TodoTable 
+            TableName: !Ref TodoTable # update
         - CloudWatchPutMetricPolicy: {}
       Environment: #config for runtime env of lambda
         Variables:
           TABLE_NAME: !Ref TodoTable # update this
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
-          USE_DYNAMODB_LOCAL: "0"
+          USE_DYNAMODB_LOCAL: "0" # update all this when we have local setup
           DYNAMODB_LOCAL_URI: ""
 
-      Events:
+      Events: # this defined what will be in the event object
         GetItem:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /item/{id}
             Method: get
-            RestApiId: !Ref TodoApi
+            RestApiId: !Ref TodoApi # change this
             Auth:
-              Authorizer: CognitoAuthorizer
+              Authorizer: CognitoAuthorizer # the authorizer object in event hold username of authenticated user who sent the request
 
   GetAllTodoFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      CodeUri: todo-src/getAllTodo
-      Handler: app.getAllToDoItem
+      CodeUri: todo-src/getAllTodo # update
+      Handler: app.getAllToDoItem # update
       Tracing: Active
       Policies:
         - DynamoDBReadPolicy:
-            TableName: !Ref TodoTable
+            TableName: !Ref TodoTable # update
         - CloudWatchPutMetricPolicy: {}
       Environment:
         Variables:
-          TABLE_NAME: !Ref TodoTable
+          TABLE_NAME: !Ref TodoTable # update
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           ENDPOINT_OVERRIDE: ""
 
@@ -185,23 +185,23 @@ Resources: # aws stuff we want to provision
           Properties:
             Path: /item
             Method: get
-            RestApiId: !Ref TodoApi
+            RestApiId: !Ref TodoApi # update
             Auth:
               Authorizer: CognitoAuthorizer
 
   CompleteTodoFunction:
       Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
       Properties:
-        CodeUri: todo-src/completeTodo/
-        Handler: app.completeToDoItem
+        CodeUri: todo-src/completeTodo/ # update this
+        Handler: app.completeToDoItem # update this
         Tracing: Active
         Policies:
           - DynamoDBCrudPolicy:
-              TableName: !Ref TodoTable
+              TableName: !Ref TodoTable # update
           - CloudWatchPutMetricPolicy: {}
         Environment:
           Variables:
-            TABLE_NAME: !Ref TodoTable
+            TABLE_NAME: !Ref TodoTable # update
             AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
             ENDPOINT_OVERRIDE: ""
 
@@ -211,23 +211,23 @@ Resources: # aws stuff we want to provision
             Properties:
               Path: /item/{id}/done
               Method: post
-              RestApiId: !Ref TodoApi
+              RestApiId: !Ref TodoApi # update
               Auth:
                 Authorizer: CognitoAuthorizer
 
   AddTodoFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      CodeUri: todo-src/addTodo/
-      Handler: app.addToDoItem
+      CodeUri: todo-src/addTodo/ # update this
+      Handler: app.addToDoItem # update this
       Tracing: Active
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: !Ref TodoTable
+            TableName: !Ref TodoTable # update this
         - CloudWatchPutMetricPolicy: {}
       Environment:
         Variables:
-          TABLE_NAME: !Ref TodoTable
+          TABLE_NAME: !Ref TodoTable # update
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           ENDPOINT_OVERRIDE: ""
 
@@ -237,23 +237,23 @@ Resources: # aws stuff we want to provision
           Properties:
             Path: /item
             Method: POST
-            RestApiId: !Ref TodoApi
+            RestApiId: !Ref TodoApi # update
             Auth:
               Authorizer: CognitoAuthorizer
 
   UpdateTodoFunction:
       Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
       Properties:
-        CodeUri: todo-src/updateTodo/
-        Handler: app.updateToDoItem
+        CodeUri: todo-src/updateTodo/ # update
+        Handler: app.updateToDoItem # update
         Tracing: Active
         Policies:
           - DynamoDBCrudPolicy:
-              TableName: !Ref TodoTable
+              TableName: !Ref TodoTable # update
           - CloudWatchPutMetricPolicy: {}
         Environment:
           Variables:
-            TABLE_NAME: !Ref TodoTable
+            TABLE_NAME: !Ref TodoTable # update
             AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
         Events:
           UpdateItem:
@@ -261,19 +261,19 @@ Resources: # aws stuff we want to provision
             Properties:
               Path: /item/{id}
               Method: PUT
-              RestApiId: !Ref TodoApi
+              RestApiId: !Ref TodoApi # update
               Auth:
                 Authorizer: CognitoAuthorizer
 
   DeleteTodoFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      CodeUri: todo-src/deleteTodo
-      Handler: app.deleteToDoItem
+      CodeUri: todo-src/deleteTodo # update
+      Handler: app.deleteToDoItem # update
       Tracing: Active
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: !Ref TodoTable
+            TableName: !Ref TodoTable # update
         - CloudWatchPutMetricPolicy: {}
       Environment:
         Variables:
@@ -384,10 +384,10 @@ Outputs:
     Value: !Sub "https://${TodoApi}.execute-api.${AWS::Region}.amazonaws.com/{StageNameParam}" # the TodoApi -> is an example of using logical ids as a reference - see more here https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/outputs-section-structure.html
   CognitoID:
     Description: The Cognito UserPool ID
-    Value: !Ref TodoUserPool 
+    Value: !Ref TodoUserPool # update
   CognitoClientID:
     Description: The Cognito UserPool Client ID
-    Value: !Ref TodoUserPoolTokenClient
+    Value: !Ref TodoUserPoolTokenClient # update
   CognitoDomainName:
     Description: The Cognito Hosted UI Domain Name
     Value: !Join ['', [!Ref CognitoDomainName, '-', !Ref AWS::StackName, '.auth.', !Ref AWS::Region, '.amazoncognito.com']]
