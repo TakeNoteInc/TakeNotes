@@ -381,7 +381,7 @@ Outputs:
   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
   TodoFunctionApi:
     Description: API Gateway endpoint URL for Prod stage
-    Value: !Sub "https://${TodoApi}.execute-api.${AWS::Region}.amazonaws.com/{StageNameParam}"
+    Value: !Sub "https://${TodoApi}.execute-api.${AWS::Region}.amazonaws.com/{StageNameParam}" # the TodoApi -> is an example of using logical ids as a reference - see more here https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/outputs-section-structure.html
   CognitoID:
     Description: The Cognito UserPool ID
     Value: !Ref TodoUserPool 
