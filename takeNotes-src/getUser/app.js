@@ -29,21 +29,21 @@ function isValidRequest(context, event) {
         (event.pathParameters.id !== null);
 }
 
-function getCognitoUsername(event){
-    let authHeader = event.requestContext.authorizer;
-    if (authHeader !== null)
-    {
-        return authHeader.claims["cognito:username"];
-    }
-    return null;
+// function getCognitoUsername(event){
+//     let authHeader = event.requestContext.authorizer;
+//     if (authHeader !== null)
+//     {
+//         return authHeader.claims["cognito:username"];
+//     }
+//     return null;
 
-}
+// }
 
 function getRecordById(username, recordId) {
     let params = {
         TableName: TABLE_NAME,
         Key: {
-            "cognito-username": username,
+            // "cognito-username": username,
             "id": recordId
         }
     };
@@ -58,9 +58,9 @@ exports.getUser = async (event, context, callback) => {
         }
 
         try {
-            let username = getCognitoUsername(event);
-            let data = await getRecordById(username, event.pathParameters.id).promise()
-            // let data = await getRecordById(event.pathParameters.id).promise();
+            // let username = getCognitoUsername(event);
+            // let data = await getRecordById(username, event.pathParameters.id).promise()
+            let data = await getRecordById(event.pathParameters.id).promise();
             return response(200, data);
         } catch (err) {
             return response(400, { message: err.message });
