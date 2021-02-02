@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: TakeNotes serverless web application
 Globals:
@@ -27,7 +27,7 @@ Parameters:
     Default: v1
   StageNameParam:
     Type: String
-    Default: prod
+    Default: test
   CognitoDomainName:
     Type: String
     Default: take-notes
@@ -65,7 +65,7 @@ Resources:
         - http://localhost:8080
         - https://localhost
         - !Join
-          - ''
+          - ""
           - - https://
       SupportedIdentityProviders:
         - COGNITO
@@ -79,7 +79,7 @@ Resources:
     Type: AWS::Cognito::UserPoolDomain
     Properties:
       Domain: !Join
-        - '-'
+        - "-"
         - - !Ref CognitoDomainName
           - !Ref AWS::StackName
       UserPoolId: !Ref TakeNotesUserPool
@@ -87,7 +87,7 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: !Join
-        - '-'
+        - "-"
         - - TakeNotes-table
           - !Ref AWS::StackName
       KeySchema:
@@ -110,7 +110,7 @@ Resources:
     MethodSettings:
       DataTraceEnabled: true
       MetricsEnabled: true
-      HttpMethod: '*'
+      HttpMethod: "*"
       ResourcePath: !Sub ${VersionParam}/*
       LoggingLevel: INFO
     AccessLogSetting:
@@ -121,9 +121,9 @@ Resources:
       StageName: !Ref StageNameParam
       TracingEnabled: true
       Cors:
-        AllowOrigin: '''*'''
-        AllowMethods: '''OPTIONS,HEAD,GET,PUT,POST,DELETE'''
-        AllowHeaders: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'''
+        AllowOrigin: "'*'"
+        AllowMethods: "'OPTIONS,HEAD,GET,PUT,POST,DELETE'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
       Auth:
         Authorizers:
           CognitoAuthorizer:
@@ -141,9 +141,9 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref TakeNotesTable
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
-          USE_DYNAMODB_LOCAL: '0'
-          DYNAMODB_LOCAL_URI: ''
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          USE_DYNAMODB_LOCAL: "0"
+          DYNAMODB_LOCAL_URI: ""
       Events:
         GetUser:
           Type: Api
@@ -166,14 +166,29 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref TakeNotesTable
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
-          ENDPOINT_OVERRIDE: ''
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
+  TakeNotesTestRequestGet:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: takeNotes-src/testRequest/
+      Handler: app.testRequest
+      Tracing: Active
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TakeNotesTable
+        - CloudWatchPutMetricPolicy: {}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TakeNotesTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
       Events:
         PutItem:
           Type: Api
           Properties:
-            Path: /users
-            Method: POST
+            Path: /
+            Method: ANY
             RestApiId: !Ref TakeNotesApi
             Auth:
               Authorizer: CognitoAuthorizer
@@ -182,7 +197,7 @@ Resources:
     Properties:
       Description: Push logs to CloudWatch logs from API Gateway
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
@@ -216,9 +231,9 @@ Outputs:
   CognitoDomainName:
     Description: The Cognito Hosted UI Domain Name
     Value: !Join
-      - ''
+      - ""
       - - !Ref CognitoDomainName
-        - '-'
+        - "-"
         - !Ref AWS::StackName
         - .auth.
         - !Ref AWS::Region
