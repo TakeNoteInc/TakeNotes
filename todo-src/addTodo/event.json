@@ -105,7 +105,7 @@
         "authorizer": {
             "claims": {
                 "at_hash": "jFB4pZ3DsY_RCKEXAMPLE",
-                "sub": "f1f50796-e81b-4793-9d55-6230647a0000",
+                "sub": "60620ca3-53f7-4728-94f1-0e6c40a95f05",
                 "aud": "mj9hu7v4nrmtsu12cispl3rt2",
                 "email_verified": "true",
                 "event_id": "ddba78de-02b9-4a30-b9ba-4d0ab6b08c00",
