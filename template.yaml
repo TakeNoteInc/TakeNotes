@@ -131,11 +131,11 @@ Resources:
       Tracing: Active
       Policies:
         - DynamoDBReadPolicy:
-            TableName: !Ref TodoTable
+            TableName: !Ref UsersTable
         - CloudWatchPutMetricPolicy: {}
       Environment:
         Variables:
-          TABLE_NAME: !Ref TodoTable
+          TABLE_NAME: !Ref UsersTable
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
           USE_DYNAMODB_LOCAL: '0'
           DYNAMODB_LOCAL_URI: ''
@@ -156,11 +156,11 @@ Resources:
       Tracing: Active
       Policies:
         - DynamoDBReadPolicy:
-            TableName: !Ref TodoTable
+            TableName: !Ref UsersTable
         - CloudWatchPutMetricPolicy: {}
       Environment:
         Variables:
-          TABLE_NAME: !Ref TodoTable
+          TABLE_NAME: !Ref UsersTable
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
           ENDPOINT_OVERRIDE: ''
       Events:
@@ -180,11 +180,11 @@ Resources:
       Tracing: Active
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: !Ref TodoTable
+            TableName: !Ref UsersTable
         - CloudWatchPutMetricPolicy: {}
       Environment:
         Variables:
-          TABLE_NAME: !Ref TodoTable
+          TABLE_NAME: !Ref UsersTable
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
           ENDPOINT_OVERRIDE: ''
       Events:
@@ -204,11 +204,11 @@ Resources:
       Tracing: Active
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: !Ref TodoTable
+            TableName: !Ref UsersTable
         - CloudWatchPutMetricPolicy: {}
       Environment:
         Variables:
-          TABLE_NAME: !Ref TodoTable
+          TABLE_NAME: !Ref UsersTable
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
           ENDPOINT_OVERRIDE: ''
       Events:
@@ -228,11 +228,11 @@ Resources:
       Tracing: Active
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: !Ref TodoTable
+            TableName: !Ref UsersTable
         - CloudWatchPutMetricPolicy: {}
       Environment:
         Variables:
-          TABLE_NAME: !Ref TodoTable
+          TABLE_NAME: !Ref UsersTable
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
       Events:
         UpdateItem:
@@ -251,11 +251,11 @@ Resources:
       Tracing: Active
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: !Ref TodoTable
+            TableName: !Ref UsersTable
         - CloudWatchPutMetricPolicy: {}
       Environment:
         Variables:
-          TABLE_NAME: !Ref TodoTable
+          TABLE_NAME: !Ref UsersTable
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
           ENDPOINT_OVERRIDE: ''
       Events:
