@@ -36,14 +36,14 @@ function isValidRequest(context, event) {
     return true;
 }
 
-function getCognitoUsername(event){
-    let authHeader = event.requestContext.authorizer;
-    if (authHeader !== null)
-    {
-        return authHeader.claims["cognito:username"];
-    }
-    return null;
-}
+// function getCognitoUsername(event){
+//     let authHeader = event.requestContext.authorizer;
+//     if (authHeader !== null)
+//     {
+//         return authHeader.claims["cognito:username"];
+//     }
+//     return null;
+// }
 
 let getDateFromISO = (date) => (new Date(date));
 let getWeeks = (start, end) => Math.round((getDateFromISO(end)-getDateFromISO(start))/WEEK_MILLISECONDS);
@@ -72,9 +72,9 @@ let generateDoc = (body) => {
 }
 
 function addRecord(event) {
-    let usernameField = {
-        "cognito-username": getCognitoUsername(event)
-    }
+    // let usernameField = {
+    //     "cognito-username": getCognitoUsername(event)
+    // }
     let docBody = generateDoc(event.body);
     // auto generated date fields
     let d = (new Date()).toISOString();
@@ -86,8 +86,8 @@ function addRecord(event) {
     console.log(docBody.journal);
 
     //merge the json objects
-    let item_body = { ...usernameField, ...autoFields, docBody }
-    // let itemBody = { ...autoFields, docBody };
+    // let item_body = { ...usernameField, ...autoFields, docBody }
+    let itemBody = { ...autoFields, docBody };
 
     
     const params = {
