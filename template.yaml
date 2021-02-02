@@ -33,7 +33,7 @@ Parameters:
     Default: prod
   CognitoDomainName:
     Type: String
-    Default: TakeNotes
+    Default: take-notes
 
 Resources:
   #cognito declaration
