@@ -37,13 +37,9 @@ Resources:
         - - TakeNotes-table-test
           - !Ref AWS::StackName
       KeySchema:
-        - AttributeName: email
-          KeyType: HASH
         - AttributeName: id
-          KeyType: RANGE
+          KeyType: HASH
       AttributeDefinitions:
-        - AttributeName: email
-          AttributeType: S
         - AttributeName: id
           AttributeType: S
       ProvisionedThroughput:
@@ -108,6 +104,13 @@ Resources:
           TABLE_NAME: !Ref TakeNotesTable
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           ENDPOINT_OVERRIDE: ""
+      Events:
+        PostUser:
+          Type: Api
+          Properties:
+            Path: /users/
+            Method: POST
+            RestApiId: !Ref TakeNotesApi
   TakeNotesTestRequestGet:
     Type: AWS::Serverless::Function
     Properties:
@@ -124,7 +127,7 @@ Resources:
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           ENDPOINT_OVERRIDE: ""
       Events:
-        PutItem:
+        TestReq:
           Type: Api
           Properties:
             Path: /
@@ -149,7 +152,6 @@ Resources:
     Properties:
       LogGroupName: !Sub /aws/apigateway/AccessLog-${TakeNotesApi}
       RetentionInDays: 365
-
 Outputs:
   TakeNotesFunctionApi:
     Description: API Gateway endpoint URL for Prod stage

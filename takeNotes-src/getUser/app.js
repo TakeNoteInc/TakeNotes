@@ -39,7 +39,8 @@ function isValidRequest(context, event) {
 
 // }
 
-function getRecordById(username, recordId) {
+// function getRecordById(username, recordId) {
+function getRecordById(recordId) {
     let params = {
         TableName: TABLE_NAME,
         Key: {
