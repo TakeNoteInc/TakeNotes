@@ -54,12 +54,13 @@ let getWeeks = (start, end) => Math.round((getDateFromISO(end)-getDateFromISO(st
  * @return {object} 
  */
 let generateDoc = (body) => {
-    let numWeeks = getWeeks(body.start, body.end);
+    let inputBody = JSON.parse(body);
+    let numWeeks = getWeeks(inputBody.start, inputBody.end);
     if (numWeeks <= 0) {
         throw Error(`numWeeks is invalid: ${numWeeks}`);
     }
     return {
-        email: body.email,
+        email: inputBody.email,
         journal: {
             weeks: Array(numWeeks).map(x => {
                 let dateString = (new Date()).toISOString();
