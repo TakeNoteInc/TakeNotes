@@ -34,7 +34,7 @@ Resources:
     Properties:
       TableName: !Join
         - "-"
-        - - TakeNotes-table-test
+        - - TakeNotes-table-test1
           - !Ref AWS::StackName
       KeySchema:
         - AttributeName: id
