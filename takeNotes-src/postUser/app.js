@@ -111,13 +111,13 @@ function addRecord(event) {
     
     const params = {
         TableName: TABLE_NAME,
-        Item: itemBody
+        Item: itemBody,
+        ReturnValues: 'ALL_OLD'
     };
     console.log(params);
-    docClient.put(params);
 
     // Return the new object
-    return params;
+    return [docClient.put(params), params];
 }
 
 // Lambda Handler
@@ -127,7 +127,12 @@ exports.postUser = async (event, context, callback) => {
     }
     
     try {
-        let data = addRecord(event);
+        let dbResp = addRecord(event);
+        let [dbPromise, dbInput] = [await dbResp[0].promise(), dbResp[1]];
+        let data = {
+            dbResp: dbPromise,
+            input: dbInput 
+        };
         return response(200, data)
     } catch (err) {
         return response(400, { message: err.message })
