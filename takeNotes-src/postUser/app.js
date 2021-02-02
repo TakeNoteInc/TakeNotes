@@ -46,7 +46,7 @@ function isValidRequest(context, event) {
 // }
 
 let getDateFromISO = (date) => (new Date(date));
-let getWeeks = (start, end) => Math.round((getDateFromISO(end)-getDateFromISO(start))/WEEK_MILLISECONDS);
+let getNumWeeks = (start, end) => Math.round((getDateFromISO(end)-getDateFromISO(start))/WEEK_MILLISECONDS);
 
 /**
  * This function takes the POST input and intializes a document matching our schema.
@@ -55,24 +55,40 @@ let getWeeks = (start, end) => Math.round((getDateFromISO(end)-getDateFromISO(st
  */
 let generateDoc = (body) => {
     let inputBody = JSON.parse(body);
-    let numWeeks = getWeeks(inputBody.start, inputBody.end);
+    let numWeeks = getNumWeeks(inputBody.start, inputBody.end);
     if (numWeeks <= 0) {
         throw Error(`numWeeks is invalid: ${numWeeks}`);
     }
+    let dateString = (new Date()).toISOString();
+    let weeks = new Array(numWeeks);
+    for (var i = 0; i < numWeeks; i++) {
+        weeks[i] = {
+            created: dateString,
+            updated: dateString,
+            entries: []
+        };
+    }
     return {
         email: inputBody.email,
+        start: inputBody.start,
+        end: inputBody.end,
         journal: {
-            weeks: Array(numWeeks).map(x => {
-                let dateString = (new Date()).toISOString();
-                return {
-                    created: dateString,
-                    updated: dateString,
-                    entries: []
-                }
-            })
+            weeks: weeks
         },
         notes: []
     }
+}
+
+function getRecordById(recordId) {
+    let params = {
+        TableName: TABLE_NAME,
+        Key: {
+            // "cognito-username": username,
+            "id": recordId
+        }
+    };
+
+    return docClient.get(params);
 }
 
 function addRecord(event) {
@@ -87,7 +103,6 @@ function addRecord(event) {
         "created": d,
         "updated": d
     };
-    console.log(docBody.journal);
 
     //merge the json objects
     // let itemBody = { ...usernameField, ...autoFields, docBody }
@@ -99,8 +114,10 @@ function addRecord(event) {
         Item: itemBody
     };
     console.log(params);
-    
-    return docClient.put(params);
+    docClient.put(params);
+
+    // Return the new object
+    return getRecordById(autoFields.id);
 }
 
 // Lambda Handler
