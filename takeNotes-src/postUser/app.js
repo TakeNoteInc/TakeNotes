@@ -117,7 +117,7 @@ function addRecord(event) {
     docClient.put(params);
 
     // Return the new object
-    return getRecordById(autoFields.id);
+    return params;
 }
 
 // Lambda Handler
@@ -127,7 +127,7 @@ exports.postUser = async (event, context, callback) => {
     }
     
     try {
-        let data = await addRecord(event).promise()
+        let data = addRecord(event);
         return response(200, data)
     } catch (err) {
         return response(400, { message: err.message })

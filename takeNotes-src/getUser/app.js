@@ -62,6 +62,9 @@ exports.getUser = async (event, context, callback) => {
             // let username = getCognitoUsername(event);
             // let data = await getRecordById(username, event.pathParameters.id).promise()
             let data = await getRecordById(event.pathParameters.id).promise();
+            if (data === null || data === undefined) {
+                return response(404, { message: "Record not found" });
+            }
             return response(200, data);
         } catch (err) {
             return response(400, { message: err.message });
