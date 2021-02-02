@@ -37,9 +37,13 @@ Resources:
         - - TakeNotes-table-test
           - !Ref AWS::StackName
       KeySchema:
+        - AttributeName: email
+          KeyType: HASH
         - AttributeName: id
           KeyType: RANGE
       AttributeDefinitions:
+        - AttributeName: email
+          AttributeType: S
         - AttributeName: id
           AttributeType: S
       ProvisionedThroughput:
