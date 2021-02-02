@@ -55,6 +55,9 @@ let getWeeks = (start, end) => Math.round((getDateFromISO(end)-getDateFromISO(st
  */
 let generateDoc = (body) => {
     let numWeeks = getWeeks(body.start, body.end);
+    if (numWeeks <= 0) {
+        throw Error(`numWeeks is invalid: ${numWeeks}`);
+    }
     return {
         email: body.email,
         journal: {
