@@ -52,13 +52,15 @@ function addRecord(event) {
     let auto_fields = {
         "id": uuidv1(),
         "creation_date": dISO,
-        "lastupdate_date": dISO
+        "lastupdate_date": dISO, 
+        "completed": false, 
+        "item": "buy apples"
     }
     console.log('setting up item body')
     //merge the json objects
-    let item_body = {...usernameField, ...auto_fields, ...JSON.parse(event.body) }
+    let item_body = {...usernameField, ...auto_fields}
 
-    console.log(item_body);
+    console.log('the magical item body: ' + item_body);
     
     //final params to DynamoDB
     const params = {
