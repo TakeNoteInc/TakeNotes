@@ -41,10 +41,11 @@ function getCognitoUsername(event){
 
 function addRecord(event) {
 
+    console.log('inside addRecord')
     let usernameField = {
         "cognito-username": getCognitoUsername(event)
     }
-
+    console.log('username: ' + getCognitoUsername(event))
     // auto generated date fields
     let d = new Date()
     let dISO = d.toISOString()
@@ -53,7 +54,7 @@ function addRecord(event) {
         "creation_date": dISO,
         "lastupdate_date": dISO
     }
-
+    console.log('setting up item body')
     //merge the json objects
     let item_body = {...usernameField, ...auto_fields, ...JSON.parse(event.body) }
 
@@ -64,7 +65,7 @@ function addRecord(event) {
         TableName: TABLE_NAME,
         Item: item_body
     }
-
+    console.log('finally putting into body! tablename: ' + TABLE_NAME)
     return docClient.put(params)
 }
 
@@ -82,12 +83,13 @@ exports.addToDoItem =
             }
 
             try {
+                console.log('here we go into addRecord')
                 let data = await addRecord(event).promise()
                 metrics.putMetric("Success", 1, Unit.Count)
                 return response(200, data)
             } catch (err) {
                 metrics.putMetric("Error", 1, Unit.Count)
-                return response(400, { message: err.message, holy: 'bricked putting in db wtf'})
+                return response(400, { message: err.message, holy: 'bricked putting in db wtf', full: event})
             }
         }
     )
