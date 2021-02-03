@@ -28,10 +28,9 @@ function isValidRequest(context, event) {
         (event.pathParameters !== null) &&
         (event.pathParameters.id !== null);
 
-    let body = event.body
+    let body = event.body;
     let isBodyValid = (body !== null) &&
-        (body.completed !== null) &&
-        (body.item !== null);
+        (body.docBody !== null);
 
     return isIdValid && isBodyValid;
 }
