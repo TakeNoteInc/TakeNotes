@@ -78,7 +78,7 @@ exports.addToDoItem =
 
             if (!isValidRequest(context, event)) {
                 metrics.putMetric("Error", 1, Unit.Count)
-                return response(400, { message: "Error: Invalid request" })
+                return response(400, { message: "Error: Invalid request - request sucks", body: event.body, full: event })
             }
 
             try {
@@ -87,7 +87,7 @@ exports.addToDoItem =
                 return response(200, data)
             } catch (err) {
                 metrics.putMetric("Error", 1, Unit.Count)
-                return response(400, { message: err.message })
+                return response(400, { message: err.message, holy: 'bricked putting in db wtf'})
             }
         }
     )
