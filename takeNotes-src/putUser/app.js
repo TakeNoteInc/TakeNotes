@@ -30,8 +30,7 @@ function isValidRequest(context, event) {
 
     let body = event.body;
     let isBodyValid = (body !== null) &&
-        (body.docBody !== null) &&
-        ("docBody" in body);
+        (body.docBody !== null);
 
     return isIdValid && isBodyValid;
 }
