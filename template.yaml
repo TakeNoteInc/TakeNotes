@@ -111,6 +111,28 @@ Resources:
             Path: /users/
             Method: POST
             RestApiId: !Ref TakeNotesApi
+  PutTakeNotesUser:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: takeNotes-src/putUser/
+      Handler: app.putUser
+      Tracing: Active
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TakeNotesTable
+        - CloudWatchPutMetricPolicy: {}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TakeNotesTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
+      Events:
+        PutUser:
+          Type: Api
+          Properties:
+            Path: /users/{id}
+            Method: PUT
+            RestApiId: !Ref TakeNotesApi
   TakeNotesTestRequestGet:
     Type: AWS::Serverless::Function
     Properties:
