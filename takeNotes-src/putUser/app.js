@@ -66,7 +66,7 @@ function updateRecord(recordId, eventBody) {
 }
 
 // Lambda Handler
-exports.updateToDoItem = async (event, context, callback) => {
+exports.putUser = async (event, context, callback) => {
     if (!isValidRequest(context, event)) {
         return response(400, { message: "Error: Invalid request" });
     }
