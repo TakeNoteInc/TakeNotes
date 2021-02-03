@@ -133,6 +133,28 @@ Resources:
             Path: /users/{id}
             Method: PUT
             RestApiId: !Ref TakeNotesApi
+  DeleteTakeNotesUser:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: takeNotes-src/deleteUser/
+      Handler: app.deleteUser
+      Tracing: Active
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TakeNotesTable
+        - CloudWatchPutMetricPolicy: {}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TakeNotesTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
+      Events:
+        DeleteUser:
+          Type: Api
+          Properties:
+            Path: /users/{id}
+            Method: DELETE
+            RestApiId: !Ref TakeNotesApi
   TakeNotesTestRequestGet:
     Type: AWS::Serverless::Function
     Properties:

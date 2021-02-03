@@ -5,7 +5,6 @@
 const AWS = require('aws-sdk');
 const DDB = new AWS.DynamoDB({ apiVersion: "2012-10-08" });
 
-
 // environment variables
 const { TABLE_NAME, ENDPOINT_OVERRIDE, REGION } = process.env;
 const options = { region: REGION };
@@ -24,16 +23,9 @@ const response = (statusCode, body, additionalHeaders) => ({
 });
 
 function isValidRequest(context, event) {
-    let isIdValid = (event !== null) &&
+    return (event !== null) &&
         (event.pathParameters !== null) &&
         (event.pathParameters.id !== null);
-
-    let body = event.body;
-    let isBodyValid = (body !== null) &&
-        (body.docBody !== null) &&
-        ("docBody" in body);
-
-    return isIdValid && isBodyValid;
 }
 
 // function getCognitoUsername(event){
@@ -46,36 +38,29 @@ function isValidRequest(context, event) {
 // }
 
 
-// function updateRecord(username, recordId, eventBody) {
-function updateRecord(recordId, eventBody) {
-    let d = new Date();
-    eventBody.docBody.id = recordId;    // Preserve ID
-    const params = {
+// function deleteRecordById(username, recordId) {
+function deleteRecordById(recordId) {
+    let params = {
         TableName: TABLE_NAME,
         Key: {
             // "cognito-username": username,
-            "id": recordId
-        },
-        UpdateExpression: "set updated = :u, docBody = :d",
-        ExpressionAttributeValues: {
-            ':u': d.toISOString(),
-            ':d': eventBody.docBody
-        },
-        ReturnValues: "ALL_NEW"
+            id: recordId
+        }
     };
 
-    return docClient.update(params);
+    return docClient.delete(params);
 }
 
 // Lambda Handler
-exports.putUser = async (event, context, callback) => {
+exports.deleteUser = async (event, context, callback) => {
     if (!isValidRequest(context, event)) {
         return response(400, { message: "Error: Invalid request" });
     }
 
     try {
         // let username = getCognitoUsername(event);
-        let data = await updateRecord(event.pathParameters.id, JSON.parse(event.body)).promise();
+        // let data = await deleteRecordById(username, event.pathParameters.id).promise()
+        let data = await deleteRecordById(event.pathParameters.id).promise();
         return response(200, data);
     } catch (err) {
         return response(400, { message: err.message });
