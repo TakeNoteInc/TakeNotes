@@ -70,11 +70,15 @@ let getWeeks = (start, end) => {
  * @param {object} body The POST input body, a parsed JSON object.
  * @return {object} 
  */
-let generateDoc = (body) => {
-    let inputBody = JSON.parse(body);
+let generateDoc = (email) => {
+    // TODO: Hardcoded, change asap
+    let inputBody = {
+        start: "2021-05-10",
+        end: "2021-09-03"
+    };
     let weeks = getWeeks(inputBody.start, inputBody.end);
     return {
-        email: inputBody.email,
+        email: email,
         start: inputBody.start,
         end: inputBody.end,
         journal: {
@@ -84,27 +88,16 @@ let generateDoc = (body) => {
     }
 }
 
-function getRecordById(recordId) {
-    let params = {
-        TableName: TABLE_NAME,
-        Key: {
-            // "cognito-username": username,
-            "id": recordId
-        }
-    };
-
-    return docClient.get(params);
-}
-
 function addRecord(event) {
     // let usernameField = {
     //     "cognito-username": getCognitoUsername(event)
     // }
-    let docBody = generateDoc(event.body);
+    let { email, sub } = event.request.userAttributes;
+    let docBody = generateDoc(email);
     // auto generated date fields
     let d = (new Date()).toISOString();
     let autoFields = {
-        "id": uuidv1(),
+        "id": sub,
         "created": d,
         "updated": d
     };
@@ -119,6 +112,7 @@ function addRecord(event) {
         Item: itemBody,
         ReturnValues: 'ALL_OLD'
     };
+    console.log("params");
     console.log(params);
 
     // Return the new object
@@ -129,8 +123,6 @@ function addRecord(event) {
 exports.postUser = async (event, context, callback) => {
     console.log("event");
     console.log(event);
-    console.log("context");
-    console.log(context);
     if (!isValidRequest(context, event)) {
         return response(400, { message: "Error: Invalid request" })
     }
@@ -139,8 +131,11 @@ exports.postUser = async (event, context, callback) => {
         let dbResp = addRecord(event);
         let [dbPromise, dbInput] = [await dbResp[0].promise(), dbResp[1]];
         let data = {
-            dbResp: dbPromise,
-            input: dbInput 
+            request: event,
+            response: {
+                dbResp: dbPromise,
+                input: dbInput 
+            }
         };
         return response(200, data)
     } catch (err) {
