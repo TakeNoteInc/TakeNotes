@@ -240,12 +240,6 @@ Resources:
         - http://localhost:3000
         - http://localhost:8080
         - https://localhost
-        - !Join
-          - ''
-          - - https://
-            - !GetAtt AmplifyBranch.BranchName
-            - .
-            - !GetAtt AmplifyApp.DefaultDomain
       SupportedIdentityProviders:
         - COGNITO
       AllowedOAuthScopes:
