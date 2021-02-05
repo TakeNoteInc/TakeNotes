@@ -237,18 +237,17 @@ Resources:
       GenerateSecret: false
       AllowedOAuthFlowsUserPoolClient: true
       AllowedOAuthFlows:
-        - code
         - implicit
       CallbackURLs:
-        - http://localhost:3000
-        - http://localhost:8080
-        - https://localhost
+        - http://localhost:3000/
       SupportedIdentityProviders:
         - COGNITO
       AllowedOAuthScopes:
         - phone
         - email
         - openid
+        - profile
+        - aws.cognito.signin.user.admin
       ExplicitAuthFlows:
         - USER_PASSWORD_AUTH
   UserPoolDomain:
