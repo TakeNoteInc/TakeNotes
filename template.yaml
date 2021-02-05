@@ -28,6 +28,9 @@ Parameters:
   StageNameParam:
     Type: String
     Default: test
+  CognitoDomainName:
+    Type: String
+    Default: takenotesapp
 Resources:
   TakeNotesTable:
     Type: AWS::DynamoDB::Table
