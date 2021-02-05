@@ -268,7 +268,7 @@ Outputs:
     Value: !Ref UserPool
   CognitoClientID:
     Description: The Cognito UserPool Client ID
-    Value: !Ref UserPoolTokenClient
+    Value: !Ref UserPoolClient
   CognitoDomainName:
     Description: The Cognito Hosted UI Domain Name
     Value: !Join
