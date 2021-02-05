@@ -48,14 +48,8 @@ function isValidRequest(context, event) {
 let getDateFromISO = (date) => (new Date(date));
 let getNumWeeks = (start, end) => Math.round((getDateFromISO(end)-getDateFromISO(start))/WEEK_MILLISECONDS);
 
-/**
- * This function takes the POST input and intializes a document matching our schema.
- * @param {object} body The POST input body, a parsed JSON object.
- * @return {object} 
- */
-let generateDoc = (body) => {
-    let inputBody = JSON.parse(body);
-    let numWeeks = getNumWeeks(inputBody.start, inputBody.end);
+let getWeeks = (start, end) => {
+    let numWeeks = getNumWeeks(start, end);
     if (numWeeks <= 0) {
         throw Error(`numWeeks is invalid: ${numWeeks}`);
     }
@@ -68,6 +62,17 @@ let generateDoc = (body) => {
             entries: []
         };
     }
+    return weeks;
+};
+
+/**
+ * This function takes the POST input and intializes a document matching our schema.
+ * @param {object} body The POST input body, a parsed JSON object.
+ * @return {object} 
+ */
+let generateDoc = (body) => {
+    let inputBody = JSON.parse(body);
+    let weeks = getWeeks(inputBody.start, inputBody.end);
     return {
         email: inputBody.email,
         start: inputBody.start,
@@ -122,6 +127,10 @@ function addRecord(event) {
 
 // Lambda Handler
 exports.postUser = async (event, context, callback) => {
+    console.log("event");
+    console.log(event);
+    console.log("context");
+    console.log(context);
     if (!isValidRequest(context, event)) {
         return response(400, { message: "Error: Invalid request" })
     }
