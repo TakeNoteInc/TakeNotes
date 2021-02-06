@@ -32,7 +32,6 @@ function deleteRecordById(recordId) {
             id: recordId
         }
     };
-
     return docClient.delete(params);
 }
 
