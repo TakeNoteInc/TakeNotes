@@ -27,7 +27,6 @@ Parameters:
     Default: v1
   StageNameParam:
     Type: String
-    Default: test
   CognitoDomainName:
     Type: String
     Default: takenotesapp
