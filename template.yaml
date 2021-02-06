@@ -276,7 +276,7 @@ Resources:
       SourceArn: !GetAtt UserPool.Arn
 Outputs:
   TakeNotesFunctionApi:
-    Description: API Gateway endpoint URL for Prod stage
+    Description: !Sub API Gateway endpoint URL for ${StageNameParam}
     Value: !Sub https://${TakeNotesApi}.execute-api.${AWS::Region}.amazonaws.com/${StageNameParam}
   CognitoID:
     Description: The Cognito UserPool ID
