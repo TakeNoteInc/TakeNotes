@@ -230,6 +230,13 @@ Resources:
           RequireNumbers: false
           RequireSymbols: false
           RequireUppercase: true
+      Schema:
+        - Name: startDate
+          Mutable: true
+          AttributeDataType: String
+        - Name: endDate
+          Mutable: true
+          AttributeDataType: String
       LambdaConfig:
         PostConfirmation: !GetAtt PostTakeNotesUser.Arn
   UserPoolClient:
