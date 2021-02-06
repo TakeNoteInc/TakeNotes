@@ -123,13 +123,17 @@ function addRecord(event) {
 exports.postUser = async (event, context, callback) => {
     console.log("event");
     console.log(event);
+    console.log("callback");
+    console.log(callback);
     if (!isValidRequest(context, event)) {
-        return response(400, {
-            request: event.request,
-            response: {
-                message: "Error: Invalid request"
-            }
-        })
+        // return response(400, {
+        //     request: event.request,
+        //     response: {
+        //         message: "Error: Invalid request"
+        //     }
+        // })
+        // return response(400, event);
+        return callback(null, event);
     }
     
     try {
@@ -143,8 +147,11 @@ exports.postUser = async (event, context, callback) => {
                 input: dbInput 
             }
         };
-        return response(200, data)
+        // return response(200, event);
+        return callback(null, event);
     } catch (err) {
-        return response(400, { message: err.message })
+        // return response(400, { message: err.message })
+        // return response(400, event);
+        return callback(null, event);
     }
 }
