@@ -28,7 +28,7 @@ const response = (statusCode, body, additionalHeaders) => ({
 });
 
 function isValidRequest(context, event) {
-    if (event.body === null) {
+    if (event.request === null) {
         return false;
     }
 
@@ -124,14 +124,20 @@ exports.postUser = async (event, context, callback) => {
     console.log("event");
     console.log(event);
     if (!isValidRequest(context, event)) {
-        return response(400, { message: "Error: Invalid request" })
+        return response(400, {
+            request: event.request,
+            response: {
+                message: "Error: Invalid request"
+            }
+        })
     }
     
     try {
         let dbResp = addRecord(event);
         let [dbPromise, dbInput] = [await dbResp[0].promise(), dbResp[1]];
+        
         let data = {
-            request: event,
+            request: event.request,
             response: {
                 dbResp: dbPromise,
                 input: dbInput 
