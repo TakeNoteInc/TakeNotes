@@ -28,12 +28,12 @@ const response = (statusCode, body, additionalHeaders) => ({
 });
 
 function isValidRequest(context, event) {
-    if (event.request === null && 
-        event.request.userAttributes &&
-        event.request.userAttributes['custom:startDate'] &&
-        event.request.userAttributes['custom:endDate'] &&
-        event.request.userAttributes.email &&
-        event.request.userAttributes.sub) {
+    if (event.request !== null && 
+        event.request.userAttributes !== null &&
+        event.request.userAttributes['custom:startDate'] !== null &&
+        event.request.userAttributes['custom:endDate'] !== null &&
+        event.request.userAttributes.email !== null &&
+        event.request.userAttributes.sub !== null) {
         return true;
     }
 
