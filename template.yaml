@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: TakeNotes serverless web application
 Globals:
@@ -36,7 +36,7 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: !Join
-        - '-'
+        - "-"
         - - TakeNotes-table-test
           - !Ref AWS::StackName
       KeySchema:
@@ -55,7 +55,7 @@ Resources:
     MethodSettings:
       DataTraceEnabled: true
       MetricsEnabled: true
-      HttpMethod: '*'
+      HttpMethod: "*"
       ResourcePath: !Sub ${VersionParam}/*
       LoggingLevel: INFO
     AccessLogSetting:
@@ -66,9 +66,9 @@ Resources:
       StageName: !Ref StageNameParam
       TracingEnabled: true
       Cors:
-        AllowOrigin: '''*'''
-        AllowMethods: '''OPTIONS,HEAD,GET,PUT,POST,DELETE'''
-        AllowHeaders: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'''
+        AllowOrigin: "'*'"
+        AllowMethods: "'OPTIONS,HEAD,GET,PUT,POST,DELETE'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
       Auth:
         Authorizers:
           CognitoAuthorizer:
@@ -86,9 +86,9 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref TakeNotesTable
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
-          USE_DYNAMODB_LOCAL: '0'
-          DYNAMODB_LOCAL_URI: ''
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          USE_DYNAMODB_LOCAL: "0"
+          DYNAMODB_LOCAL_URI: ""
       Events:
         GetUser:
           Type: Api
@@ -111,8 +111,8 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref TakeNotesTable
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
-          ENDPOINT_OVERRIDE: ''
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
       Events:
         PostUser:
           Type: Api
@@ -135,8 +135,8 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref TakeNotesTable
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
-          ENDPOINT_OVERRIDE: ''
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
       Events:
         PutUser:
           Type: Api
@@ -159,8 +159,8 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref TakeNotesTable
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
-          ENDPOINT_OVERRIDE: ''
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
       Events:
         DeleteUser:
           Type: Api
@@ -183,8 +183,8 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref TakeNotesTable
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
-          ENDPOINT_OVERRIDE: ''
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
       Events:
         TestReq:
           Type: Api
@@ -199,7 +199,7 @@ Resources:
     Properties:
       Description: Push logs to CloudWatch logs from API Gateway
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
@@ -254,14 +254,14 @@ Resources:
     Type: AWS::Cognito::UserPoolDomain
     Properties:
       Domain: !Join
-        - '-'
+        - "-"
         - - !Ref CognitoDomainName
           - !Ref AWS::StackName
       UserPoolId: !Ref UserPool
 Outputs:
   TakeNotesFunctionApi:
     Description: API Gateway endpoint URL for Prod stage
-    Value: !Sub https://${TakeNotesApi}.execute-api.${AWS::Region}.amazonaws.com/{StageNameParam}
+    Value: !Sub https://${TakeNotesApi}.execute-api.${AWS::Region}.amazonaws.com/${StageNameParam}
   CognitoID:
     Description: The Cognito UserPool ID
     Value: !Ref UserPool
@@ -271,9 +271,9 @@ Outputs:
   CognitoDomainName:
     Description: The Cognito Hosted UI Domain Name
     Value: !Join
-      - ''
+      - ""
       - - !Ref CognitoDomainName
-        - '-'
+        - "-"
         - !Ref AWS::StackName
         - .auth.
         - !Ref AWS::Region
