@@ -28,31 +28,27 @@ const response = (statusCode, body, additionalHeaders) => ({
 });
 
 function isValidRequest(context, event) {
-    if (event.request === null) {
-        return false;
+    if (event.request === null && 
+        event.request.userAttributes &&
+        event.request.userAttributes['custom:startDate'] &&
+        event.request.userAttributes['custom:endDate'] &&
+        event.request.userAttributes.email &&
+        event.request.userAttributes.sub) {
+        return true;
     }
 
-    // TODO: Validate/assert that the body matches our schema
-    return true;
+    return false;
 }
 
-// function getCognitoUsername(event){
-//     let authHeader = event.requestContext.authorizer;
-//     if (authHeader !== null)
-//     {
-//         return authHeader.claims["cognito:username"];
-//     }
-//     return null;
-// }
-
 let getDateFromISO = (date) => (new Date(date));
-let getNumWeeks = (start, end) => Math.round((getDateFromISO(end)-getDateFromISO(start))/WEEK_MILLISECONDS);
+let getNumWeeks = (start, end) => {
+    let [startDateObj, endDateObj] = [getDateFromISO(start), getDateFromISO(end)];
+    if (startDateObj.getTime() >= endDateObj.getTime()) throw Error("End date is <= start date.");
+    return Math.round((endDateObj-startDateObj)/WEEK_MILLISECONDS);
+};
 
 let getWeeks = (start, end) => {
     let numWeeks = getNumWeeks(start, end);
-    if (numWeeks <= 0) {
-        throw Error(`numWeeks is invalid: ${numWeeks}`);
-    }
     let dateString = (new Date()).toISOString();
     let weeks = new Array(numWeeks);
     for (var i = 0; i < numWeeks; i++) {
@@ -70,17 +66,13 @@ let getWeeks = (start, end) => {
  * @param {object} body The POST input body, a parsed JSON object.
  * @return {object} 
  */
-let generateDoc = (email) => {
-    // TODO: Hardcoded, change asap
-    let inputBody = {
-        start: "2021-05-10",
-        end: "2021-09-03"
-    };
-    let weeks = getWeeks(inputBody.start, inputBody.end);
+let generateDoc = (attributes) => {
+    let [start, end] = [attributes['custom:startDate'], attributes['custom:endDate']];
+    let weeks = getWeeks(start, end);
     return {
-        email: email,
-        start: inputBody.start,
-        end: inputBody.end,
+        email: attributes.email,
+        start: start,
+        end: end,
         journal: {
             weeks: weeks
         },
@@ -89,24 +81,18 @@ let generateDoc = (email) => {
 }
 
 function addRecord(event) {
-    // let usernameField = {
-    //     "cognito-username": getCognitoUsername(event)
-    // }
-    let { email, sub } = event.request.userAttributes;
-    let docBody = generateDoc(email);
-    // auto generated date fields
+    let attributes = event.request.userAttributes;
+    let docBody = generateDoc(attributes);
+    
     let d = (new Date()).toISOString();
-    let autoFields = {
-        "id": sub,
+    let metaFields = {
+        "id": attributes.sub,
         "created": d,
         "updated": d
     };
 
-    //merge the json objects
-    // let itemBody = { ...usernameField, ...autoFields, docBody }
-    let itemBody = { ...autoFields, docBody };
+    let itemBody = { ...metaFields, docBody };
 
-    
     const params = {
         TableName: TABLE_NAME,
         Item: itemBody,
@@ -126,32 +112,15 @@ exports.postUser = async (event, context, callback) => {
     console.log("callback");
     console.log(callback);
     if (!isValidRequest(context, event)) {
-        // return response(400, {
-        //     request: event.request,
-        //     response: {
-        //         message: "Error: Invalid request"
-        //     }
-        // })
-        // return response(400, event);
-        return callback(null, event);
+        return callback(Error("Request is invalid!"), event);
     }
     
     try {
         let dbResp = addRecord(event);
         let [dbPromise, dbInput] = [await dbResp[0].promise(), dbResp[1]];
         
-        let data = {
-            request: event.request,
-            response: {
-                dbResp: dbPromise,
-                input: dbInput 
-            }
-        };
-        // return response(200, event);
         return callback(null, event);
     } catch (err) {
-        // return response(400, { message: err.message })
-        // return response(400, event);
-        return callback(null, event);
+        return callback(err, event);
     }
 }
