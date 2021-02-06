@@ -26,7 +26,8 @@ Parameters:
     Type: String
     Default: v1
   StageNameParam:
-    Type: String
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /<EnvironmentName>/StageNameParam
   CognitoDomainName:
     Type: String
     Default: takenotesapp
