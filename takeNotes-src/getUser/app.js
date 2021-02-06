@@ -1,10 +1,6 @@
-// Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
-// SPDX-License-Identifier: MIT-0
-
 // default imports
 const AWS = require('aws-sdk');
 const DDB = new AWS.DynamoDB({ apiVersion: "2012-10-08" });
-
 
 // environment variables
 const { TABLE_NAME, ENDPOINT_OVERRIDE, REGION } = process.env;
@@ -16,6 +12,7 @@ if (ENDPOINT_OVERRIDE !== "") {
 }
 
 const docClient = new AWS.DynamoDB.DocumentClient(options);
+
 // response helper
 const response = (statusCode, body) => ({
     statusCode,
@@ -29,22 +26,10 @@ function isValidRequest(context, event) {
         (event.pathParameters.id !== null);
 }
 
-// function getCognitoUsername(event){
-//     let authHeader = event.requestContext.authorizer;
-//     if (authHeader !== null)
-//     {
-//         return authHeader.claims["cognito:username"];
-//     }
-//     return null;
-
-// }
-
-// function getRecordById(username, recordId) {
 function getRecordById(recordId) {
     let params = {
         TableName: TABLE_NAME,
         Key: {
-            // "cognito-username": username,
             "id": recordId
         }
     };
@@ -59,8 +44,6 @@ exports.getUser = async (event, context, callback) => {
         }
 
         try {
-            // let username = getCognitoUsername(event);
-            // let data = await getRecordById(username, event.pathParameters.id).promise()
             let data = await getRecordById(event.pathParameters.id).promise();
             if (data === null || data === undefined) {
                 return response(404, { message: "Record not found" });

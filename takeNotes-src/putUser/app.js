@@ -1,10 +1,6 @@
-// Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
-// SPDX-License-Identifier: MIT-0
-
 // default imports
 const AWS = require('aws-sdk');
 const DDB = new AWS.DynamoDB({ apiVersion: "2012-10-08" });
-
 
 // environment variables
 const { TABLE_NAME, ENDPOINT_OVERRIDE, REGION } = process.env;
@@ -16,6 +12,7 @@ if (ENDPOINT_OVERRIDE !== "") {
 }
 
 const docClient = new AWS.DynamoDB.DocumentClient(options);
+
 // response helper
 const response = (statusCode, body, additionalHeaders) => ({
     statusCode,
@@ -35,24 +32,12 @@ function isValidRequest(context, event) {
     return isIdValid && isBodyValid;
 }
 
-// function getCognitoUsername(event){
-//     let authHeader = event.requestContext.authorizer;
-//     if (authHeader !== null)
-//     {
-//         return authHeader.claims["cognito:username"];
-//     }
-//     return null;
-// }
-
-
-// function updateRecord(username, recordId, eventBody) {
 function updateRecord(recordId, eventBody) {
     let d = new Date();
     eventBody.docBody.id = recordId;    // Preserve ID
     const params = {
         TableName: TABLE_NAME,
         Key: {
-            // "cognito-username": username,
             "id": recordId
         },
         UpdateExpression: "set updated = :u, docBody = :d",
@@ -73,7 +58,6 @@ exports.putUser = async (event, context, callback) => {
     }
 
     try {
-        // let username = getCognitoUsername(event);
         let data = await updateRecord(event.pathParameters.id, JSON.parse(event.body)).promise();
         return response(200, data);
     } catch (err) {

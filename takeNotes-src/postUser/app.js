@@ -1,10 +1,6 @@
-// Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
-// SPDX-License-Identifier: MIT-0
-
 // default imports
 const AWS = require('aws-sdk');
 const DDB = new AWS.DynamoDB({ apiVersion: "2012-10-08" });
-const { v1: uuidv1 } = require('uuid');
 
 // environment variables
 const { TABLE_NAME, ENDPOINT_OVERRIDE, REGION } = process.env;

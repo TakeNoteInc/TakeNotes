@@ -1,6 +1,3 @@
-// Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
-// SPDX-License-Identifier: MIT-0
-
 // default imports
 const AWS = require('aws-sdk');
 const DDB = new AWS.DynamoDB({ apiVersion: "2012-10-08" });
@@ -28,22 +25,10 @@ function isValidRequest(context, event) {
         (event.pathParameters.id !== null);
 }
 
-// function getCognitoUsername(event){
-//     let authHeader = event.requestContext.authorizer;
-//     if (authHeader !== null)
-//     {
-//         return authHeader.claims["cognito:username"];
-//     }
-//     return null;
-// }
-
-
-// function deleteRecordById(username, recordId) {
 function deleteRecordById(recordId) {
     let params = {
         TableName: TABLE_NAME,
         Key: {
-            // "cognito-username": username,
             id: recordId
         }
     };
@@ -58,8 +43,6 @@ exports.deleteUser = async (event, context, callback) => {
     }
 
     try {
-        // let username = getCognitoUsername(event);
-        // let data = await deleteRecordById(username, event.pathParameters.id).promise()
         let data = await deleteRecordById(event.pathParameters.id).promise();
         return response(200, data);
     } catch (err) {
