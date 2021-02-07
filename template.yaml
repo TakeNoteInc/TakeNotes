@@ -161,6 +161,7 @@ Resources:
           TABLE_NAME: !Ref TakeNotesTable
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           ENDPOINT_OVERRIDE: ""
+          POOL_ID: !Ref UserPool
       Events:
         DeleteUser:
           Type: Api

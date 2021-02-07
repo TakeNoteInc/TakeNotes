@@ -7,7 +7,7 @@ const {
   } = require("@aws-sdk/client-cognito-identity-provider");
 
 // environment variables
-let { TABLE_NAME, ENDPOINT_OVERRIDE, REGION } = process.env;
+let { TABLE_NAME, ENDPOINT_OVERRIDE, REGION, POOL_ID } = process.env;
 REGION = 'us-east-1'
 const options = { region: REGION };
 AWS.config.update({ region: REGION });
@@ -51,7 +51,7 @@ exports.deleteUser = async (event, context, callback) => {
     try {
         console.log(event);
         let data = await deleteRecordById(event.pathParameters.id).promise();
-        let params = { UserPoolId: event.userPoolId, Username: event.username }
+        let params = { UserPoolId: POOL_ID, Username: event.username }
         console.log('db delete complete = now doing user pool delete')
         console.log(params);
         const command = new AdminDeleteUserCommand(params);
