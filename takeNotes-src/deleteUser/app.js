@@ -49,7 +49,7 @@ function deleteRecordById(recordId) {
   return docClient.delete(params);
 }
 
-function setUpParamas(body) {
+function setUpParams(body) {
   body = JSON.parse(body);
   let params = { AccessToken: body.token };
   console.log("body: " + body + " params: " + params);
@@ -57,7 +57,7 @@ function setUpParamas(body) {
 }
 
 function deleteCognitoUser(body) {
-  const command = new DeleteUserCommand(setUpParamas(body));
+  const command = new DeleteUserCommand(setUpParams(body));
   console.log(command);
   return cognitoClient.send(command);
 }
