@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: TakeNotes serverless web application
 Globals:
@@ -26,73 +26,23 @@ Parameters:
     Type: String
     Default: v1
   StageNameParam:
-    Type: String
-    Default: dev
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /<EnvironmentName>/StageNameParam
   CognitoDomainName:
     Type: String
-    Default: mytodoappdemo
+    Default: takenotesapp
 Resources:
-  TodoUserPool:
-    Type: AWS::Cognito::UserPool
-    Properties:
-      AdminCreateUserConfig:
-        AllowAdminCreateUserOnly: false
-      UserPoolName: TodoUsers
-      UsernameAttributes:
-        - email
-      AutoVerifiedAttributes:
-        - email
-      Policies:
-        PasswordPolicy:
-          MinimumLength: 6
-          RequireLowercase: true
-          RequireNumbers: false
-          RequireSymbols: false
-          RequireUppercase: true
-  TodoUserPoolTokenClient:
-    Type: AWS::Cognito::UserPoolClient
-    Properties:
-      UserPoolId: !Ref TodoUserPool
-      GenerateSecret: false
-      AllowedOAuthFlowsUserPoolClient: true
-      AllowedOAuthFlows:
-        - code
-        - implicit
-      CallbackURLs:
-        - http://localhost:3000
-        - http://localhost:8080
-        - https://localhost
-      SupportedIdentityProviders:
-        - COGNITO
-      AllowedOAuthScopes:
-        - phone
-        - email
-        - openid
-      ExplicitAuthFlows:
-        - USER_PASSWORD_AUTH
-  TodoDomain:
-    Type: AWS::Cognito::UserPoolDomain
-    Properties:
-      Domain: !Join
-        - '-'
-        - - !Ref CognitoDomainName
-          - !Ref AWS::StackName
-      UserPoolId: !Ref TodoUserPool
-  UsersTable:
+  TakeNotesTable:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: !Join
-        - '-'
-        - - users-table
+        - "-"
+        - - TakeNotes-table-test
           - !Ref AWS::StackName
       KeySchema:
-        - AttributeName: cognito-username
-          KeyType: HASH
         - AttributeName: id
-          KeyType: RANGE
+          KeyType: HASH
       AttributeDefinitions:
-        - AttributeName: cognito-username
-          AttributeType: S
         - AttributeName: id
           AttributeType: S
       ProvisionedThroughput:
@@ -100,19 +50,19 @@ Resources:
         WriteCapacityUnits: 5
       SSESpecification:
         SSEEnabled: true
-  TodoApi:
+  TakeNotesApi:
     Type: AWS::Serverless::Api
     MethodSettings:
       DataTraceEnabled: true
       MetricsEnabled: true
-      HttpMethod: '*'
+      HttpMethod: "*"
       ResourcePath: !Sub ${VersionParam}/*
       LoggingLevel: INFO
     AccessLogSetting:
       DestinationArn: !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:${ApiAccessLogGroup}
       Format: '$context.identity.sourceIp $context.authorizer.claims.sub [$context.requestTime] "$context.httpMethod $context.resourcePath $context.protocol" $context.status $context.requestId $context.awsEndpointRequestId $context.xrayTraceId $context.responseLatency $context.integrationLatency "$context.error.message"'
     Properties:
-      Name: TodoApi
+      Name: TakeNotesApi
       StageName: !Ref StageNameParam
       TracingEnabled: true
       Cors:
@@ -122,149 +72,126 @@ Resources:
       Auth:
         Authorizers:
           CognitoAuthorizer:
-            UserPoolArn: !GetAtt TodoUserPool.Arn
-  GetTodoFunction:
+            UserPoolArn: !GetAtt UserPool.Arn
+  GetTakeNotesUser:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: todo-src/getTodo
-      Handler: app.getToDoItem
+      CodeUri: takeNotes-src/getUser
+      Handler: app.getUser
       Tracing: Active
       Policies:
         - DynamoDBReadPolicy:
-            TableName: !Ref UsersTable
+            TableName: !Ref TakeNotesTable
         - CloudWatchPutMetricPolicy: {}
       Environment:
         Variables:
-          TABLE_NAME: !Ref UsersTable
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
-          USE_DYNAMODB_LOCAL: '0'
-          DYNAMODB_LOCAL_URI: ''
+          TABLE_NAME: !Ref TakeNotesTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          USE_DYNAMODB_LOCAL: "0"
+          DYNAMODB_LOCAL_URI: ""
       Events:
-        GetItem:
+        GetUser:
           Type: Api
           Properties:
-            Path: /item/{id}
+            Path: /users/{id}
             Method: get
-            RestApiId: !Ref TodoApi
+            RestApiId: !Ref TakeNotesApi
             Auth:
               Authorizer: CognitoAuthorizer
-  GetAllTodoFunction:
+  PostTakeNotesUser:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: todo-src/getAllTodo
-      Handler: app.getAllToDoItem
-      Tracing: Active
-      Policies:
-        - DynamoDBReadPolicy:
-            TableName: !Ref UsersTable
-        - CloudWatchPutMetricPolicy: {}
-      Environment:
-        Variables:
-          TABLE_NAME: !Ref UsersTable
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
-          ENDPOINT_OVERRIDE: ''
-      Events:
-        GetItem:
-          Type: Api
-          Properties:
-            Path: /item
-            Method: get
-            RestApiId: !Ref TodoApi
-            Auth:
-              Authorizer: CognitoAuthorizer
-  CompleteTodoFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: todo-src/completeTodo/
-      Handler: app.completeToDoItem
+      CodeUri: takeNotes-src/postUser/
+      Handler: app.postUser
       Tracing: Active
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: !Ref UsersTable
+            TableName: !Ref TakeNotesTable
         - CloudWatchPutMetricPolicy: {}
       Environment:
         Variables:
-          TABLE_NAME: !Ref UsersTable
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
-          ENDPOINT_OVERRIDE: ''
+          TABLE_NAME: !Ref TakeNotesTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
       Events:
-        CompleteItem:
+        PostUser:
           Type: Api
           Properties:
-            Path: /item/{id}/done
-            Method: post
-            RestApiId: !Ref TodoApi
-            Auth:
-              Authorizer: CognitoAuthorizer
-  AddTodoFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: todo-src/addTodo/
-      Handler: app.addToDoItem
-      Tracing: Active
-      Policies:
-        - DynamoDBCrudPolicy:
-            TableName: !Ref UsersTable
-        - CloudWatchPutMetricPolicy: {}
-      Environment:
-        Variables:
-          TABLE_NAME: !Ref UsersTable
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
-          ENDPOINT_OVERRIDE: ''
-      Events:
-        PutItem:
-          Type: Api
-          Properties:
-            Path: /item
+            Path: /users/
             Method: POST
-            RestApiId: !Ref TodoApi
+            RestApiId: !Ref TakeNotesApi
             Auth:
               Authorizer: CognitoAuthorizer
-  UpdateTodoFunction:
+  PutTakeNotesUser:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: todo-src/updateTodo/
-      Handler: app.updateToDoItem
+      CodeUri: takeNotes-src/putUser/
+      Handler: app.putUser
       Tracing: Active
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: !Ref UsersTable
+            TableName: !Ref TakeNotesTable
         - CloudWatchPutMetricPolicy: {}
       Environment:
         Variables:
-          TABLE_NAME: !Ref UsersTable
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
+          TABLE_NAME: !Ref TakeNotesTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
       Events:
-        UpdateItem:
+        PutUser:
           Type: Api
           Properties:
-            Path: /item/{id}
+            Path: /users/{id}
             Method: PUT
-            RestApiId: !Ref TodoApi
+            RestApiId: !Ref TakeNotesApi
             Auth:
               Authorizer: CognitoAuthorizer
-  DeleteTodoFunction:
+  DeleteTakeNotesUser:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: todo-src/deleteTodo
-      Handler: app.deleteToDoItem
+      CodeUri: takeNotes-src/deleteUser/
+      Handler: app.deleteUser
       Tracing: Active
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: !Ref UsersTable
+            TableName: !Ref TakeNotesTable
         - CloudWatchPutMetricPolicy: {}
       Environment:
         Variables:
-          TABLE_NAME: !Ref UsersTable
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
-          ENDPOINT_OVERRIDE: ''
+          TABLE_NAME: !Ref TakeNotesTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
       Events:
-        DeleteItem:
+        DeleteUser:
           Type: Api
           Properties:
-            Path: /item/{id}
+            Path: /users/{id}
             Method: DELETE
-            RestApiId: !Ref TodoApi
+            RestApiId: !Ref TakeNotesApi
+            Auth:
+              Authorizer: CognitoAuthorizer
+  TakeNotesTestRequestGet:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: takeNotes-src/testRequest/
+      Handler: app.testRequest
+      Tracing: Active
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TakeNotesTable
+        - CloudWatchPutMetricPolicy: {}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TakeNotesTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
+      Events:
+        TestReq:
+          Type: Api
+          Properties:
+            Path: /
+            Method: ANY
+            RestApiId: !Ref TakeNotesApi
             Auth:
               Authorizer: CognitoAuthorizer
   ApiGatewayPushToCloudWatchRole:
@@ -284,24 +211,85 @@ Resources:
   ApiAccessLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub /aws/apigateway/AccessLog-${TodoApi}
+      LogGroupName: !Sub /aws/apigateway/AccessLog-${TakeNotesApi}
       RetentionInDays: 365
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: false
+      UserPoolName: !Sub TakeNotesUsers-${StageNameParam}
+      UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 6
+          RequireLowercase: true
+          RequireNumbers: false
+          RequireSymbols: false
+          RequireUppercase: true
+      Schema:
+        - Name: startDate
+          Mutable: true
+          AttributeDataType: String
+        - Name: endDate
+          Mutable: true
+          AttributeDataType: String
+      LambdaConfig:
+        PostConfirmation: !GetAtt PostTakeNotesUser.Arn
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref UserPool
+      GenerateSecret: false
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthFlows:
+        - implicit
+      CallbackURLs:
+        - http://localhost:3000/
+      SupportedIdentityProviders:
+        - COGNITO
+      AllowedOAuthScopes:
+        - phone
+        - email
+        - openid
+        - profile
+        - aws.cognito.signin.user.admin
+      ExplicitAuthFlows:
+        - USER_PASSWORD_AUTH
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: !Join
+        - "-"
+        - - !Ref CognitoDomainName
+          - !Ref AWS::StackName
+      UserPoolId: !Ref UserPool
+  UserPoolToPostTakeNotesUserPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt PostTakeNotesUser.Arn
+      Principal: cognito-idp.amazonaws.com
+      Action: lambda:InvokeFunction
+      SourceArn: !GetAtt UserPool.Arn
 Outputs:
-  TodoFunctionApi:
-    Description: API Gateway endpoint URL for Prod stage
-    Value: !Sub https://${TodoApi}.execute-api.${AWS::Region}.amazonaws.com/{StageNameParam}
+  TakeNotesFunctionApi:
+    Description: API Gateway endpoint URL.
+    Value: !Sub https://${TakeNotesApi}.execute-api.${AWS::Region}.amazonaws.com/${StageNameParam}
   CognitoID:
     Description: The Cognito UserPool ID
-    Value: !Ref TodoUserPool
+    Value: !Ref UserPool
   CognitoClientID:
     Description: The Cognito UserPool Client ID
-    Value: !Ref TodoUserPoolTokenClient
+    Value: !Ref UserPoolClient
   CognitoDomainName:
     Description: The Cognito Hosted UI Domain Name
     Value: !Join
-      - ''
+      - ""
       - - !Ref CognitoDomainName
-        - '-'
+        - "-"
         - !Ref AWS::StackName
         - .auth.
         - !Ref AWS::Region
