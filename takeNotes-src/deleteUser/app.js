@@ -7,7 +7,8 @@ const {
   } = require("@aws-sdk/client-cognito-identity-provider");
 
 // environment variables
-const { TABLE_NAME, ENDPOINT_OVERRIDE, REGION } = process.env;
+let { TABLE_NAME, ENDPOINT_OVERRIDE, REGION } = process.env;
+REGION = 'us-east-1'
 const options = { region: REGION };
 AWS.config.update({ region: REGION });
 
