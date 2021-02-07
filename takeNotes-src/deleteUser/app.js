@@ -3,7 +3,7 @@ const AWS = require('aws-sdk');
 const DDB = new AWS.DynamoDB({ apiVersion: "2012-10-08" });
 const {
     CognitoIdentityProviderClient,
-    AdminDeleteUserCommand,
+    DeleteUserCommand,
   } = require("@aws-sdk/client-cognito-identity-provider");
 
 // environment variables
@@ -51,10 +51,10 @@ exports.deleteUser = async (event, context, callback) => {
     try {
         console.log(event);
         let data = await deleteRecordById(event.pathParameters.id).promise();
-        let params = { UserPoolId: POOL_ID, Username: event.username }
+        let params = { AccessToken: event.body["token"] }//UserPoolId: POOL_ID, Username: event.username }
         console.log('db delete complete = now doing user pool delete')
         console.log(params);
-        const command = new AdminDeleteUserCommand(params);
+        const command = new DeleteUserCommand(params);
         console.log(command);
         data = await cognitoClient.send(command)
         return response(200, data);
