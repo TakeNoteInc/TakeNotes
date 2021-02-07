@@ -50,7 +50,7 @@ function deleteRecordById(recordId) {
 }
 
 function setUpParamas(body) {
-  let body = JSON.parse(body);
+  body = JSON.parse(body);
   let params = { AccessToken: body.token };
   console.log("body: " + body + " params: " + params);
   return params;
