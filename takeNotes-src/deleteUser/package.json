@@ -4,7 +4,8 @@
   "description": "POST handler for TakeNotes users API",
   "main": "src/app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "style": "npx prettier --write ."
   },
   "author": "",
   "license": "ISC",
@@ -12,5 +13,8 @@
     "@aws-sdk/client-cognito-identity-provider": "^3.4.1",
     "aws-sdk": "^2.834.0",
     "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "prettier": "2.2.1"
   }
 }
