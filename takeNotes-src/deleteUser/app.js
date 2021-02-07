@@ -16,7 +16,7 @@ if (ENDPOINT_OVERRIDE !== "") {
 }
 
 const docClient = new AWS.DynamoDB.DocumentClient(options);
-const cognitoClient = new CognitoIdentityProviderClient(options);
+const cognitoClient = new CognitoIdentityProviderClient({region: REGION});
 
 // response helper
 const response = (statusCode, body, additionalHeaders) => ({
