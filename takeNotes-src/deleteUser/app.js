@@ -51,7 +51,9 @@ exports.deleteUser = async (event, context, callback) => {
     try {
         console.log(event);
         let data = await deleteRecordById(event.pathParameters.id).promise();
-        let params = { AccessToken: event.body["token"] }//UserPoolId: POOL_ID, Username: event.username }
+        let body = JSON.parse(event.body);
+        console.log(body);
+        let params = { AccessToken: body.token }//UserPoolId: POOL_ID, Username: event.username }
         console.log('db delete complete = now doing user pool delete')
         console.log(params);
         const command = new DeleteUserCommand(params);
