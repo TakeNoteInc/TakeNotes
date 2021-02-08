@@ -70,8 +70,8 @@ exports.deleteUser = async (event, context, callback) => {
 
   try {
     console.log(event);
-    let data = await deleteRecordById(event.pathParameters.id).promise();
-    data = await deleteCognitoUser(event.body);
+    let data = await deleteCognitoUser(event.body);
+    data = await deleteRecordById(event.pathParameters.id).promise();
     return response(200, data);
   } catch (err) {
     return response(400, { message: err.message });
