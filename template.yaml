@@ -192,9 +192,34 @@ Resources:
           REGION: !Ref AWS::Region
       Events:
         PutJournal:
+            Type: Api
+            Properties:
+              Path: /users/{id}/journal
+              Method: PUT
+              RestApiId: !Ref TakeNotesApi
+              Auth:
+                Authorizer: CognitoAuthorizer
+  PutTakeNotesUserWeek:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: takeNotes-src/putWeek/
+      Handler: app.putWeek
+      Tracing: Active
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TakeNotesTable
+        - CloudWatchPutMetricPolicy: {}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TakeNotesTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
+          REGION: !Ref AWS::Region
+      Events:
+        PutWeek:
           Type: Api
           Properties:
-            Path: /users/{id}/journal
+            Path: /users/{id}/journal/weeks/{weekIdx}
             Method: PUT
             RestApiId: !Ref TakeNotesApi
             Auth:
