@@ -28,18 +28,16 @@ const response = (statusCode, body, additionalHeaders) => ({
 });
 
 function isValidRequest(context, event) {
-  if (
+  return (
     event.request !== null &&
     event.request.userAttributes !== null &&
-    event.request.userAttributes["custom:startDate"] !== null &&
-    event.request.userAttributes["custom:endDate"] !== null &&
     event.request.userAttributes.email !== null &&
-    event.request.userAttributes.sub !== null
-  ) {
-    return true;
-  }
-
-  return false;
+    event.request.userAttributes.sub !== null &&
+    "custom:startDate" in event.request.userAttributes &&
+    "custom:endDate" in event.request.userAttributes &&
+    event.request.userAttributes["custom:startDate"] !== null &&
+    event.request.userAttributes["custom:endDate"] !== null 
+  )
 }
 
 let getDateFromISO = (date) => new Date(date);
