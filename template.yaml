@@ -285,8 +285,6 @@ Resources:
           RequireNumbers: false
           RequireSymbols: false
           RequireUppercase: true
-      LambdaConfig:
-        PostConfirmation: !GetAtt PostTakeNotesUser.Arn
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
@@ -315,13 +313,6 @@ Resources:
         - - !Ref CognitoDomainName
           - !Ref AWS::StackName
       UserPoolId: !Ref UserPool
-  UserPoolToPostTakeNotesUserPermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !GetAtt PostTakeNotesUser.Arn
-      Principal: cognito-idp.amazonaws.com
-      Action: lambda:InvokeFunction
-      SourceArn: !GetAtt UserPool.Arn
 Outputs:
   TakeNotesFunctionApi:
     Description: API Gateway endpoint URL.
