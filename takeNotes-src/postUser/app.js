@@ -29,13 +29,14 @@ const response = (statusCode, body, additionalHeaders) => ({
 });
 
 function isValidRequest(context, event) {
+  const body = JSON.parse(event.body);
   return (
     event !== null &&
-    event.body !== null &&
-    event.body.cognitoId !== null &&
-    event.body.email !== null &&
-    event.body.startDate !== null &&
-    event.body.endDate !== null 
+    body !== null &&
+    body.cognitoId !== null &&
+    body.email !== null &&
+    body.startDate !== null &&
+    body.endDate !== null 
   )
 }
 
@@ -49,6 +50,8 @@ let getNumWeeks = (start, end) => {
 
 let getWeeks = (start, end) => {
   let numWeeks = getNumWeeks(start, end);
+  console.log("numWeeks");
+  console.log(numWeeks);
   let dateString = new Date().toISOString();
   let weeks = new Array(numWeeks);
   for (var i = 0; i < numWeeks; i++) {
@@ -84,7 +87,7 @@ let generateDoc = (attributes) => {
 };
 
 function addRecord(event) {
-  let attributes = event.body;
+  let attributes = JSON.parse(event.body);
   let docBody = generateDoc(attributes);
 
   let d = new Date().toISOString();
@@ -112,6 +115,8 @@ function addRecord(event) {
 exports.postUser = async (event, context, callback) => {
   console.log("event");
   console.log(event);
+  console.log("event type");
+  console.log(typeof(event));
   console.log("callback");
   console.log(callback);
   if (!isValidRequest(context, event)) {
@@ -127,6 +132,8 @@ exports.postUser = async (event, context, callback) => {
       input: dbInput
     });
   } catch (err) {
+    console.log("err");
+    console.log(err.message);
     return response(500, { message: err.message });
   }
 };
