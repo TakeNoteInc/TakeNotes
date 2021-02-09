@@ -73,6 +73,6 @@ exports.putWeek = async (event, context, callback) => {
     ).promise();
     return response(200, data);
   } catch (err) {
-    return response(400, { message: err.message });
+    return response(500, { message: err.message });
   }
 };

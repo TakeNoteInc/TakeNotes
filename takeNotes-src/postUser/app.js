@@ -1,4 +1,5 @@
 // default imports
+const { HttpResponse } = require("aws-sdk");
 const AWS = require("aws-sdk");
 const DDB = new AWS.DynamoDB({ apiVersion: "2012-10-08" });
 
@@ -29,14 +30,12 @@ const response = (statusCode, body, additionalHeaders) => ({
 
 function isValidRequest(context, event) {
   return (
-    event.request !== null &&
-    event.request.userAttributes !== null &&
-    event.request.userAttributes.email !== null &&
-    event.request.userAttributes.sub !== null &&
-    "custom:startDate" in event.request.userAttributes &&
-    "custom:endDate" in event.request.userAttributes &&
-    event.request.userAttributes["custom:startDate"] !== null &&
-    event.request.userAttributes["custom:endDate"] !== null 
+    event !== null &&
+    event.body !== null &&
+    event.body.cognitoId !== null &&
+    event.body.email !== null &&
+    event.body.startDate !== null &&
+    event.body.endDate !== null 
   )
 }
 
@@ -69,8 +68,8 @@ let getWeeks = (start, end) => {
  */
 let generateDoc = (attributes) => {
   let [start, end] = [
-    attributes["custom:startDate"],
-    attributes["custom:endDate"],
+    attributes.startDate,
+    attributes.endDate
   ];
   let weeks = getWeeks(start, end);
   return {
@@ -85,12 +84,12 @@ let generateDoc = (attributes) => {
 };
 
 function addRecord(event) {
-  let attributes = event.request.userAttributes;
+  let attributes = event.body;
   let docBody = generateDoc(attributes);
 
   let d = new Date().toISOString();
   let metaFields = {
-    id: attributes.sub,
+    id: attributes.cognitoId,
     created: d,
     updated: d,
   };
@@ -116,15 +115,18 @@ exports.postUser = async (event, context, callback) => {
   console.log("callback");
   console.log(callback);
   if (!isValidRequest(context, event)) {
-    return callback(Error("Request is invalid!"), event);
+    return response(400, { message: "Error: Invalid request" });
   }
 
   try {
     let dbResp = addRecord(event);
     let [dbPromise, dbInput] = [await dbResp[0].promise(), dbResp[1]];
 
-    return callback(null, event);
+    return response(200, {
+      promise: dbPromise,
+      input: dbInput
+    });
   } catch (err) {
-    return callback(err, event);
+    return response(500, { message: err.message });
   }
 };
