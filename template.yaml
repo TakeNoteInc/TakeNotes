@@ -192,13 +192,13 @@ Resources:
           REGION: !Ref AWS::Region
       Events:
         PutJournal:
-            Type: Api
-            Properties:
-              Path: /users/{id}/journal
-              Method: PUT
-              RestApiId: !Ref TakeNotesApi
-              Auth:
-                Authorizer: CognitoAuthorizer
+          Type: Api
+          Properties:
+            Path: /users/{id}/journal
+            Method: PUT
+            RestApiId: !Ref TakeNotesApi
+            Auth:
+              Authorizer: CognitoAuthorizer
   PutTakeNotesUserWeek:
     Type: AWS::Serverless::Function
     Properties:
@@ -285,15 +285,6 @@ Resources:
           RequireNumbers: false
           RequireSymbols: false
           RequireUppercase: true
-      Schema:
-        - Name: startDate
-          Mutable: true
-          AttributeDataType: String
-        - Name: endDate
-          Mutable: true
-          AttributeDataType: String
-      LambdaConfig:
-        PostConfirmation: !GetAtt PostTakeNotesUser.Arn
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
@@ -322,13 +313,6 @@ Resources:
         - - !Ref CognitoDomainName
           - !Ref AWS::StackName
       UserPoolId: !Ref UserPool
-  UserPoolToPostTakeNotesUserPermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !GetAtt PostTakeNotesUser.Arn
-      Principal: cognito-idp.amazonaws.com
-      Action: lambda:InvokeFunction
-      SourceArn: !GetAtt UserPool.Arn
 Outputs:
   TakeNotesFunctionApi:
     Description: API Gateway endpoint URL.
