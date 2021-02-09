@@ -273,7 +273,7 @@ Resources:
     Properties:
       AdminCreateUserConfig:
         AllowAdminCreateUserOnly: false
-      UserPoolName: !Sub TakeNotesUsers-${StageNameParam}
+      UserPoolName: !Sub TakeNotesUsers-test
       UsernameAttributes:
         - email
       AutoVerifiedAttributes:
