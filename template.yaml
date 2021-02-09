@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: "2010-09-09"
+AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: TakeNotes serverless web application
 Globals:
@@ -36,7 +36,7 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: !Join
-        - "-"
+        - '-'
         - - TakeNotes-table-test
           - !Ref AWS::StackName
       KeySchema:
@@ -55,7 +55,7 @@ Resources:
     MethodSettings:
       DataTraceEnabled: true
       MetricsEnabled: true
-      HttpMethod: "*"
+      HttpMethod: '*'
       ResourcePath: !Sub ${VersionParam}/*
       LoggingLevel: INFO
     AccessLogSetting:
@@ -66,9 +66,9 @@ Resources:
       StageName: !Ref StageNameParam
       TracingEnabled: true
       Cors:
-        AllowOrigin: "'*'"
-        AllowMethods: "'OPTIONS,HEAD,GET,PUT,POST,DELETE'"
-        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: '''*'''
+        AllowMethods: '''OPTIONS,HEAD,GET,PUT,POST,DELETE'''
+        AllowHeaders: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'''
       Auth:
         Authorizers:
           CognitoAuthorizer:
@@ -86,9 +86,9 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref TakeNotesTable
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
-          USE_DYNAMODB_LOCAL: "0"
-          DYNAMODB_LOCAL_URI: ""
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
+          USE_DYNAMODB_LOCAL: '0'
+          DYNAMODB_LOCAL_URI: ''
           REGION: !Ref AWS::Region
       Events:
         GetUser:
@@ -112,8 +112,8 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref TakeNotesTable
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
-          ENDPOINT_OVERRIDE: ""
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
+          ENDPOINT_OVERRIDE: ''
           REGION: !Ref AWS::Region
       Events:
         PostUser:
@@ -137,8 +137,8 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref TakeNotesTable
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
-          ENDPOINT_OVERRIDE: ""
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
+          ENDPOINT_OVERRIDE: ''
           REGION: !Ref AWS::Region
       Events:
         PutUser:
@@ -162,8 +162,8 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref TakeNotesTable
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
-          ENDPOINT_OVERRIDE: ""
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
+          ENDPOINT_OVERRIDE: ''
           REGION: !Ref AWS::Region
       Events:
         DeleteUser:
@@ -187,18 +187,18 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref TakeNotesTable
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
-          ENDPOINT_OVERRIDE: ""
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
+          ENDPOINT_OVERRIDE: ''
           REGION: !Ref AWS::Region
       Events:
         PutJournal:
-            Type: Api
-            Properties:
-              Path: /users/{id}/journal
-              Method: PUT
-              RestApiId: !Ref TakeNotesApi
-              Auth:
-                Authorizer: CognitoAuthorizer
+          Type: Api
+          Properties:
+            Path: /users/{id}/journal
+            Method: PUT
+            RestApiId: !Ref TakeNotesApi
+            Auth:
+              Authorizer: CognitoAuthorizer
   PutTakeNotesUserWeek:
     Type: AWS::Serverless::Function
     Properties:
@@ -212,8 +212,8 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref TakeNotesTable
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
-          ENDPOINT_OVERRIDE: ""
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
+          ENDPOINT_OVERRIDE: ''
           REGION: !Ref AWS::Region
       Events:
         PutWeek:
@@ -237,8 +237,8 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref TakeNotesTable
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
-          ENDPOINT_OVERRIDE: ""
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
+          ENDPOINT_OVERRIDE: ''
           REGION: !Ref AWS::Region
       Events:
         TestReq:
@@ -254,7 +254,7 @@ Resources:
     Properties:
       Description: Push logs to CloudWatch logs from API Gateway
       AssumeRolePolicyDocument:
-        Version: "2012-10-17"
+        Version: '2012-10-17'
         Statement:
           - Effect: Allow
             Principal:
@@ -285,15 +285,6 @@ Resources:
           RequireNumbers: false
           RequireSymbols: false
           RequireUppercase: true
-      Schema:
-        - Name: startDate
-          Mutable: true
-          AttributeDataType: String
-        - Name: endDate
-          Mutable: true
-          AttributeDataType: String
-      LambdaConfig:
-        PostConfirmation: !GetAtt PostTakeNotesUser.Arn
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
@@ -318,17 +309,10 @@ Resources:
     Type: AWS::Cognito::UserPoolDomain
     Properties:
       Domain: !Join
-        - "-"
+        - '-'
         - - !Ref CognitoDomainName
           - !Ref AWS::StackName
       UserPoolId: !Ref UserPool
-  UserPoolToPostTakeNotesUserPermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !GetAtt PostTakeNotesUser.Arn
-      Principal: cognito-idp.amazonaws.com
-      Action: lambda:InvokeFunction
-      SourceArn: !GetAtt UserPool.Arn
 Outputs:
   TakeNotesFunctionApi:
     Description: API Gateway endpoint URL.
@@ -345,9 +329,9 @@ Outputs:
   CognitoDomainName:
     Description: The Cognito Hosted UI Domain Name
     Value: !Join
-      - ""
+      - ''
       - - !Ref CognitoDomainName
-        - "-"
+        - '-'
         - !Ref AWS::StackName
         - .auth.
         - !Ref AWS::Region
