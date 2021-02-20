@@ -57,6 +57,8 @@ function updateRecord(recordId, eventBody) {
 
 // Lambda Handler
 exports.putNotes = async (event, context, callback) => {
+  console.log("event: " + event);
+  console.log("body: " + event.body);
   if (!isValidRequest(context, event)) {
     return response(400, { message: "Error: Invalid request" });
   }
