@@ -39,6 +39,7 @@ function isValidRequest(context, event) {
 
 function updateRecord(recordId, eventBody) {
   let d = new Date();
+  console.log("record id: " + recordId + " eventBody: " + eventBody.notes);
   const params = {
     TableName: TABLE_NAME,
     Key: {
