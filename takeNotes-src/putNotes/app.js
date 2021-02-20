@@ -1,6 +1,7 @@
 // default imports
 const AWS = require("aws-sdk");
 const DDB = new AWS.DynamoDB({ apiVersion: "2012-10-08" });
+import { v4 as uuidv4 } from "uuid";
 
 // environment variables
 const { TABLE_NAME, ENDPOINT_OVERRIDE, REGION } = process.env;
@@ -43,7 +44,7 @@ function updateRecord(recordId, eventBody) {
     Key: {
       id: recordId,
     },
-    UpdateExpression: "set updated = :u, docBody.notes = :n",
+    UpdateExpression: `set updated = :u, docBody.notes.${uuidv4()} = :n`,
     ExpressionAttributeValues: {
       ":u": d.toISOString(),
       ":n": eventBody.notes,

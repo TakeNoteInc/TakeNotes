@@ -216,7 +216,7 @@ Resources:
           ENDPOINT_OVERRIDE: ""
           REGION: !Ref AWS::Region
       Events:
-        PutJournal:
+        PutNotes:
           Type: Api
           Properties:
             Path: /users/{id}/notes

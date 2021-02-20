@@ -28,6 +28,9 @@ const response = (statusCode, body, additionalHeaders) => ({
   },
 });
 
+//logger helper
+const logger = (valueName, value) => console.log(`${valueName}: ${value}`);
+
 function isValidRequest(context, event) {
   const body = JSON.parse(event.body);
   return (
@@ -36,8 +39,8 @@ function isValidRequest(context, event) {
     body.cognitoId !== null &&
     body.email !== null &&
     body.startDate !== null &&
-    body.endDate !== null 
-  )
+    body.endDate !== null
+  );
 }
 
 let getDateFromISO = (date) => new Date(date);
@@ -50,8 +53,7 @@ let getNumWeeks = (start, end) => {
 
 let getWeeks = (start, end) => {
   let numWeeks = getNumWeeks(start, end);
-  console.log("numWeeks");
-  console.log(numWeeks);
+  logger("numweeks", numWeeks);
   let dateString = new Date().toISOString();
   let weeks = new Array(numWeeks);
   for (var i = 0; i < numWeeks; i++) {
@@ -70,10 +72,7 @@ let getWeeks = (start, end) => {
  * @return {object}
  */
 let generateDoc = (attributes) => {
-  let [start, end] = [
-    attributes.startDate,
-    attributes.endDate
-  ];
+  let [start, end] = [attributes.startDate, attributes.endDate];
   let weeks = getWeeks(start, end);
   return {
     email: attributes.email,
@@ -82,7 +81,7 @@ let generateDoc = (attributes) => {
     journal: {
       weeks: weeks,
     },
-    notes: [],
+    notes: {},
   };
 };
 
@@ -104,8 +103,7 @@ function addRecord(event) {
     Item: itemBody,
     ReturnValues: "ALL_OLD",
   };
-  console.log("params");
-  console.log(params);
+  logger("params", params);
 
   // Return the new object
   return [docClient.put(params), params];
@@ -113,12 +111,9 @@ function addRecord(event) {
 
 // Lambda Handler
 exports.postUser = async (event, context, callback) => {
-  console.log("event");
-  console.log(event);
-  console.log("event type");
-  console.log(typeof(event));
-  console.log("callback");
-  console.log(callback);
+  logger("event", event);
+  logger("event type", typeof event);
+  logger("callback", callback);
   if (!isValidRequest(context, event)) {
     return response(400, { message: "Error: Invalid request" });
   }
@@ -129,11 +124,10 @@ exports.postUser = async (event, context, callback) => {
 
     return response(200, {
       promise: dbPromise,
-      input: dbInput
+      input: dbInput,
     });
   } catch (err) {
-    console.log("err");
-    console.log(err.message);
+    logger("error", err.message);
     return response(500, { message: err.message });
   }
 };
