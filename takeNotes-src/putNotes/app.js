@@ -46,11 +46,12 @@ function updateRecord(recordId, eventBody) {
       id: recordId,
     },
     UpdateExpression: `set updated = :u, docBody.notes.#pr = :n`,
+    ExpressionAttributeNames = { "#pr" : "idk" },
     ExpressionAttributeValues: {
-      "#pr": "idk",
       ":u": d.toISOString(),
       ":n": eventBody.notes,
     },
+    ConditionExpression = "attribute_not_exists(docBody.notes.#pr)",
     ReturnValues: "ALL_NEW",
   };
   console.log("params: " + params);
