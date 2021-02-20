@@ -44,14 +44,15 @@ function updateRecord(recordId, eventBody) {
     Key: {
       id: recordId,
     },
-    UpdateExpression: `set updated = :u, docBody.notes.${uuidv4()} = :n`,
+    UpdateExpression: `set updated = :u, docBody.notes.#pr = :n`,
     ExpressionAttributeValues: {
+      "#pr": uuidv4().replace("-", ""),
       ":u": d.toISOString(),
       ":n": eventBody.notes,
     },
     ReturnValues: "ALL_NEW",
   };
-
+  console.log("params: " + params);
   return docClient.update(params);
 }
 
