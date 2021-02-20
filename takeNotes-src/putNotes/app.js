@@ -46,7 +46,7 @@ function updateRecord(recordId, eventBody) {
       id: recordId,
     },
     UpdateExpression: `set updated = :u, docBody.notes.#pr = :n`,
-    ExpressionAttributeNames: { "#pr": "idk" },
+    ExpressionAttributeNames: { "#pr": uuidv4().replace("-", "") },
     ExpressionAttributeValues: {
       ":u": d.toISOString(),
       ":n": eventBody.notes,
