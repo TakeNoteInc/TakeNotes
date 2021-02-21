@@ -37,7 +37,7 @@ function isValidRequest(context, event) {
   return isIdValid && isBodyValid;
 }
 
-function updateRecord(recordId, eventBody, id) {
+function updateRecord(recordId, eventBody, noteIdx) {
   let d = new Date();
   console.log("record id: " + recordId + " eventBody: " + eventBody.notes);
   const params = {
@@ -46,12 +46,12 @@ function updateRecord(recordId, eventBody, id) {
       id: recordId,
     },
     UpdateExpression: `set updated = :u, docBody.notes.#noteId = :n`,
-    ExpressionAttributeNames: { "#noteId": id },
+    ExpressionAttributeNames: { "#noteId": noteIdx },
     ExpressionAttributeValues: {
       ":u": d.toISOString(),
       ":n": eventBody.notes,
     },
-    ConditionExpression: "attribute_not_exists(docBody.notes.#noteId)",
+    ConditionExpression: "attribute_exists(docBody.notes.#noteId)",
     ReturnValues: "ALL_NEW",
   };
   console.log("params: " + params);
@@ -67,13 +67,12 @@ exports.putNotes = async (event, context, callback) => {
   }
 
   try {
-    const id = uuidv4();
     let data = await updateRecord(
       event.pathParameters.id,
       JSON.parse(event.body),
-      id
+      event.pathParameters.noteIdx
     ).promise();
-    return response(200, { data: data, id: id });
+    return response(200, data);
   } catch (err) {
     return response(400, { message: err.message });
   }

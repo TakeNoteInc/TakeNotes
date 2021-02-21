@@ -219,7 +219,7 @@ Resources:
         PutNotes:
           Type: Api
           Properties:
-            Path: /users/{id}/notes
+            Path: /users/{id}/notes/{noteIdx}
             Method: PUT
             RestApiId: !Ref TakeNotesApi
             Auth:
