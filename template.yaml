@@ -251,6 +251,31 @@ Resources:
             RestApiId: !Ref TakeNotesApi
             Auth:
               Authorizer: CognitoAuthorizer
+  PutTakeNotesUserNotes:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: takeNotes-src/putNotes/
+      Handler: app.putNotes
+      Tracing: Active
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TakeNotesTable
+        - CloudWatchPutMetricPolicy: {}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TakeNotesTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
+          REGION: !Ref AWS::Region
+      Events:
+        PutNotes:
+          Type: Api
+          Properties:
+            Path: /users/{id}/notes/{noteIdx}
+            Method: PUT
+            RestApiId: !Ref TakeNotesApi
+            Auth:
+              Authorizer: CognitoAuthorizer
   PutTakeNotesUserWeek:
     Type: AWS::Serverless::Function
     Properties:
