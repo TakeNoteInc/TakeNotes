@@ -60,7 +60,7 @@ let getWeeks = (start, end) => {
     weeks[i] = {
       created: dateString,
       updated: dateString,
-      entries: [],
+      entries: {},
     };
   }
   return weeks;
