@@ -99,6 +99,32 @@ Resources:
             RestApiId: !Ref TakeNotesApi
             Auth:
               Authorizer: CognitoAuthorizer
+  GetTakeNotesUserWeeks:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: takeNotes-src/getWeeks
+      Handler: app.getWeeks
+      Tracing: Active
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref TakeNotesTable
+        - CloudWatchPutMetricPolicy: {}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TakeNotesTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          USE_DYNAMODB_LOCAL: "0"
+          DYNAMODB_LOCAL_URI: ""
+          REGION: !Ref AWS::Region
+      Events:
+        GetUser:
+          Type: Api
+          Properties:
+            Path: /users/{id}/weeks
+            Method: get
+            RestApiId: !Ref TakeNotesApi
+            Auth:
+              Authorizer: CognitoAuthorizer
   PostTakeNotesUser:
     Type: AWS::Serverless::Function
     Properties:
