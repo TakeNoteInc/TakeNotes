@@ -56,7 +56,7 @@ function updateRecord(recordId, weekIdx, eventBody, id) {
     Key: {
       id: recordId,
     },
-    UpdateExpression: `set updated = :u, docBody.journal.weeks[${weekIdx}].entries.#entryId = :e`,
+    UpdateExpression: `set updated = :u, docBody.journal.weeks[${weekIdx}].updated = :u, docBody.journal.weeks[${weekIdx}].entries.#entryId = :e`,
     ExpressionAttributeNames: { "#entryId": id },
     ExpressionAttributeValues: {
       ":u": d.toISOString(),
