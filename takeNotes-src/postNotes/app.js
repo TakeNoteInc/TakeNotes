@@ -40,6 +40,15 @@ function isValidRequest(context, event) {
 function updateRecord(recordId, eventBody, id) {
   let d = new Date();
   console.log("record id: " + recordId + " eventBody: " + eventBody.notes);
+  let noteBody = eventBody.notes;
+
+  const metaFields = {
+    id: id,
+    created: d.toISOString(),
+    updated: d.toISOString(),
+  };
+
+  const note = { ...metaFields, ...noteBody };
   const params = {
     TableName: TABLE_NAME,
     Key: {
@@ -49,7 +58,7 @@ function updateRecord(recordId, eventBody, id) {
     ExpressionAttributeNames: { "#noteId": id },
     ExpressionAttributeValues: {
       ":u": d.toISOString(),
-      ":n": eventBody.notes,
+      ":n": note,
     },
     ConditionExpression: "attribute_not_exists(docBody.notes.#noteId)",
     ReturnValues: "ALL_NEW",
