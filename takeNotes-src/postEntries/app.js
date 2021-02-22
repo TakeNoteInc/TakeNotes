@@ -45,24 +45,24 @@ function updateRecord(recordId, weekIdx, eventBody, id) {
 
   const metaFields = {
     id: id,
-    created: d,
-    updated: d,
+    created: d.toISOString(),
+    updated: d.toISOString(),
   };
 
-  const entry = { ...metaFields, entryBody };
+  const entry = { ...metaFields, ...entryBody };
 
   const params = {
     TableName: TABLE_NAME,
     Key: {
       id: recordId,
     },
-    UpdateExpression: `set updated = :u, docBody.journal.weeks[${weekIdx}].#entryId = :e`,
+    UpdateExpression: `set updated = :u, docBody.journal.weeks[${weekIdx}].entries.#entryId = :e`,
     ExpressionAttributeNames: { "#entryId": id },
     ExpressionAttributeValues: {
       ":u": d.toISOString(),
       ":e": entry,
     },
-    ConditionExpression: `attribute_not_exists(docBody.journal.weeks[${weekIdx}].#entryId)`,
+    ConditionExpression: `attribute_not_exists(docBody.journal.weeks[${weekIdx}].entries.#entryId)`,
     ReturnValues: "ALL_NEW",
   };
   console.log("params: " + params);
