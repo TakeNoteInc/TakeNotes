@@ -40,7 +40,7 @@ function isValidRequest(context, event) {
 function updateRecord(recordId, eventBody, id) {
   let d = new Date();
   console.log("record id: " + recordId + " eventBody: " + eventBody.notes);
-  let noteBody = eventBody.notes;
+  let noteBody = eventBody.note;
 
   const metaFields = {
     id: id,
@@ -68,7 +68,7 @@ function updateRecord(recordId, eventBody, id) {
 }
 
 // Lambda Handler
-exports.postNotes = async (event, context, callback) => {
+exports.postNote = async (event, context, callback) => {
   console.log("event: " + event);
   console.log("body: " + event.body);
   if (!isValidRequest(context, event)) {
@@ -84,6 +84,6 @@ exports.postNotes = async (event, context, callback) => {
     ).promise();
     return response(200, { data: data, id: id });
   } catch (err) {
-    return response(400, { message: err.message });
+    return response(500, { message: err.message });
   }
 };

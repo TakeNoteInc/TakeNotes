@@ -127,8 +127,8 @@ Resources:
   PostTakeNotesUserNotes:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: takeNotes-src/postNotes/
-      Handler: app.postNotes
+      CodeUri: takeNotes-src/postNote/
+      Handler: app.postNote
       Tracing: Active
       Policies:
         - DynamoDBCrudPolicy:
@@ -141,7 +141,7 @@ Resources:
           ENDPOINT_OVERRIDE: ""
           REGION: !Ref AWS::Region
       Events:
-        PostUser:
+        PostNote:
           Type: Api
           Properties:
             Path: /users/{id}/notes/
