@@ -179,8 +179,8 @@ Resources:
   PostTakeNotesUserEntry:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: takeNotes-src/postEntries/
-      Handler: app.postEntries
+      CodeUri: takeNotes-src/postEntry/
+      Handler: app.postEntry
       Tracing: Active
       Policies:
         - DynamoDBCrudPolicy:
@@ -193,7 +193,7 @@ Resources:
           ENDPOINT_OVERRIDE: ""
           REGION: !Ref AWS::Region
       Events:
-        PostUser:
+        PostEntry:
           Type: Api
           Properties:
             Path: /users/{id}/journal/weeks/{weekIdx}/entries
