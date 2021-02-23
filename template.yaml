@@ -304,7 +304,7 @@ Resources:
   PutTakeNotesUserWeeksEntry:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: takeNotes-src/putEntries/
+      CodeUri: takeNotes-src/putEntry/
       Handler: app.putEntry
       Tracing: Active
       Policies:
@@ -318,7 +318,7 @@ Resources:
           ENDPOINT_OVERRIDE: ""
           REGION: !Ref AWS::Region
       Events:
-        PutWeek:
+        PutEntry:
           Type: Api
           Properties:
             Path: /users/{id}/journal/weeks/{weekIdx}/entries/{entryIdx}
