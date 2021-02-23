@@ -201,6 +201,31 @@ Resources:
             RestApiId: !Ref TakeNotesApi
             Auth:
               Authorizer: CognitoAuthorizer
+  PostTakeNotesUserNotes:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: takeNotes-src/postNote/
+      Handler: app.postNote
+      Tracing: Active
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TakeNotesTable
+        - CloudWatchPutMetricPolicy: {}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TakeNotesTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
+          REGION: !Ref AWS::Region
+      Events:
+        PostNote:
+          Type: Api
+          Properties:
+            Path: /users/{id}/notes/
+            Method: POST
+            RestApiId: !Ref TakeNotesApi
+            Auth:
+              Authorizer: CognitoAuthorizer
   PutTakeNotesUser:
     Type: AWS::Serverless::Function
     Properties:
@@ -322,6 +347,31 @@ Resources:
           Type: Api
           Properties:
             Path: /users/{id}/journal/weeks/{weekIdx}
+            Method: PUT
+            RestApiId: !Ref TakeNotesApi
+            Auth:
+              Authorizer: CognitoAuthorizer
+  PutTakeNotesUserWeeksEntry:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: takeNotes-src/putEntry/
+      Handler: app.putEntry
+      Tracing: Active
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TakeNotesTable
+        - CloudWatchPutMetricPolicy: {}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TakeNotesTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
+          REGION: !Ref AWS::Region
+      Events:
+        PutEntry:
+          Type: Api
+          Properties:
+            Path: /users/{id}/journal/weeks/{weekIdx}/entries/{entryIdx}
             Method: PUT
             RestApiId: !Ref TakeNotesApi
             Auth:

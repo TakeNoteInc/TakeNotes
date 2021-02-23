@@ -11,6 +11,9 @@ AWS.config.update({ region: REGION });
 // constants
 const WEEK_MILLISECONDS = 604800000;
 
+// globals
+let invalidInputs = [];
+
 if (ENDPOINT_OVERRIDE !== "") {
   options.endpoint = ENDPOINT_OVERRIDE;
 }
@@ -31,16 +34,37 @@ const response = (statusCode, body, additionalHeaders) => ({
 //logger helper
 const logger = (valueName, value) => console.log(`${valueName}: ${value}`);
 
+function isValidEmail(email) {
+  const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  return re.test(email);
+}
+
+function isValidDate(date) {
+  const re = /^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/;
+  return re.test(date);
+}
+
 function isValidRequest(context, event) {
   const body = JSON.parse(event.body);
-  return (
-    event !== null &&
-    body !== null &&
-    body.cognitoId !== null &&
-    body.email !== null &&
-    body.startDate !== null &&
-    body.endDate !== null
-  );
+  let isValid = true;
+  if (event === null || body === null) return false;
+  if (body.cognitoId === null) {
+    invalidInputs.push("cognitoId");
+    isValid = false;
+  }
+  if (body.email === null || !isValidEmail(body.email)) {
+    invalidInputs.push("email");
+    isValid = false;
+  }
+  if (body.startDate === null || !isValidDate(body.startDate)) {
+    invalidInputs.push("startDate");
+    isValid = false;
+  }
+  if (body.endDate === null || !isValidDate(body.endDate)) {
+    invalidInputs.push("endDate");
+    isValid = false;
+  }
+  return isValid 
 }
 
 let getDateFromISO = (date) => new Date(date);
@@ -115,7 +139,7 @@ exports.postUser = async (event, context, callback) => {
   logger("event type", typeof event);
   logger("callback", callback);
   if (!isValidRequest(context, event)) {
-    return response(400, { message: "Error: Invalid request" });
+    return response(400, { message: "Error: Invalid request", invalidInputs: invalidInputs });
   }
 
   try {
