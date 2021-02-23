@@ -176,6 +176,31 @@ Resources:
             RestApiId: !Ref TakeNotesApi
             Auth:
               Authorizer: CognitoAuthorizer
+  PostTakeNotesUserEntry:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: takeNotes-src/postEntry/
+      Handler: app.postEntry
+      Tracing: Active
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TakeNotesTable
+        - CloudWatchPutMetricPolicy: {}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TakeNotesTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
+          REGION: !Ref AWS::Region
+      Events:
+        PostEntry:
+          Type: Api
+          Properties:
+            Path: /users/{id}/journal/weeks/{weekIdx}/entries
+            Method: POST
+            RestApiId: !Ref TakeNotesApi
+            Auth:
+              Authorizer: CognitoAuthorizer
   PostTakeNotesUserNotes:
     Type: AWS::Serverless::Function
     Properties:
