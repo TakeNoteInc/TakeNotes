@@ -1,3 +1,6 @@
+# All secret files
+.*
+
 *.DS_Store
 # Logs
 logs
