@@ -47,7 +47,7 @@ function updateRecord(recordId, weekIdx, entryIdx) {
     },
     UpdateExpression: `SET updated = :u, 
                        docBody.journal.weeks[${weekIdx}].updated = :u
-                       DELETE docBody.journal.weeks[${weekIdx}].entries.#entryId`,
+                       REMOVE docBody.journal.weeks[${weekIdx}].entries.#entryId`,
     ExpressionAttributeNames: { "#entryId": entryIdx },
     ExpressionAttributeValues: {
       ":u": d.toISOString(),
