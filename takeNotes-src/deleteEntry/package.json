@@ -1,0 +1,16 @@
+{
+  "name": "delete",
+  "version": "1.0.0",
+  "description": "Delete handler for TakeNotes users API",
+  "main": "src/app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "style": "npx prettier --write ."
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.834.0",
+    "uuid": "^8.3.2"
+  }
+}

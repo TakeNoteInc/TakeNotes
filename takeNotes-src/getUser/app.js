@@ -42,6 +42,12 @@ function getRecordById(recordId) {
   return docClient.get(params);
 }
 
+const isEmpty = value =>
+  value === undefined ||
+  value === null ||
+  (typeof value === "object" && Object.keys(value).length === 0) ||
+  (typeof value === "string" && value.trim().length === 0);
+
 // Lambda Handler
 exports.getUser = async (event, context, callback) => {
   if (!isValidRequest(context, event)) {
@@ -50,7 +56,7 @@ exports.getUser = async (event, context, callback) => {
 
   try {
     let data = await getRecordById(event.pathParameters.id).promise();
-    if (data === null || data === undefined) {
+    if ((isEmpty(data))) {
       return response(404, { message: "Record not found" });
     }
     return response(200, data);
