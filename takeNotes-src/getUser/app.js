@@ -56,6 +56,7 @@ exports.getUser = async (event, context, callback) => {
 
   try {
     let data = await getRecordById(event.pathParameters.id).promise();
+    console.log(data);
     if ((isEmpty(data))) {
       return response(404, { message: "Record not found" });
     }
