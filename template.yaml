@@ -276,6 +276,31 @@ Resources:
             RestApiId: !Ref TakeNotesApi
             Auth:
               Authorizer: CognitoAuthorizer
+  DeleteTakeNotesUserNotes:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: takeNotes-src/deleteNote/
+      Handler: app.deleteNote
+      Tracing: Active
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TakeNotesTable
+        - CloudWatchPutMetricPolicy: {}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TakeNotesTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
+          REGION: !Ref AWS::Region
+      Events:
+        DeleteNote:
+          Type: Api
+          Properties:
+            Path: /users/{id}/notes/{noteIdx}
+            Method: DELETE
+            RestApiId: !Ref TakeNotesApi
+            Auth:
+              Authorizer: CognitoAuthorizer
   DeleteTakeNotesUserEntry:
     Type: AWS::Serverless::Function
     Properties:
