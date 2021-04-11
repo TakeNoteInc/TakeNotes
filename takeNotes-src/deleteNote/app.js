@@ -29,7 +29,8 @@ function isValidRequest(context, event) {
   let isIdValid =
     event !== null &&
     event.pathParameters !== null &&
-    event.pathParameters.id !== null;
+    event.pathParameters.id !== null &&
+    event.pathParameters.noteIdx !== null;
 
   return isIdValid;
 }
