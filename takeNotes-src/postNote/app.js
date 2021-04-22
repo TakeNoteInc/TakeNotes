@@ -32,14 +32,14 @@ function isValidRequest(context, event) {
     event.pathParameters.id !== null;
 
   let body = event.body;
-  let isBodyValid = body !== null && body.notes !== null;
+  let isBodyValid = body !== null && body.note !== null;
 
   return isIdValid && isBodyValid;
 }
 
 function updateRecord(recordId, eventBody, id) {
   let d = new Date();
-  console.log("record id: " + recordId + " eventBody: " + eventBody.notes);
+  console.log("record id: ", recordId, " eventBody: ", eventBody.note);
   let noteBody = eventBody.note;
 
   const metaFields = {
@@ -63,14 +63,13 @@ function updateRecord(recordId, eventBody, id) {
     ConditionExpression: "attribute_not_exists(docBody.notes.#noteId)",
     ReturnValues: "ALL_NEW",
   };
-  console.log("params: " + params);
+  console.log("params: ", params);
   return docClient.update(params);
 }
 
 // Lambda Handler
 exports.postNote = async (event, context, callback) => {
-  console.log("event: " + event);
-  console.log("body: " + event.body);
+  console.log("event: ", event);
   if (!isValidRequest(context, event)) {
     return response(400, { message: "Error: Invalid request" });
   }

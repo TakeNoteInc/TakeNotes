@@ -39,7 +39,7 @@ function isValidRequest(context, event) {
 
 function updateRecord(recordId, eventBody, noteIdx) {
   let d = new Date();
-  console.log("record id: " + recordId + " eventBody: " + eventBody.notes);
+  console.log("record id: ", recordId, " eventBody: ", eventBody.note);
   const params = {
     TableName: TABLE_NAME,
     Key: {
@@ -49,19 +49,19 @@ function updateRecord(recordId, eventBody, noteIdx) {
     ExpressionAttributeNames: { "#noteId": noteIdx },
     ExpressionAttributeValues: {
       ":u": d.toISOString(),
-      ":n": eventBody.notes,
+      ":n": eventBody.note,
     },
     ConditionExpression: "attribute_exists(docBody.notes.#noteId)",
     ReturnValues: "ALL_NEW",
   };
-  console.log("params: " + params);
+  console.log("params: ", params);
   return docClient.update(params);
 }
 
 // Lambda Handler
 exports.putNotes = async (event, context, callback) => {
-  console.log("event: " + event);
-  console.log("body: " + event.body);
+  console.log("event: ", event);
+  console.log("body: ", event.body);
   if (!isValidRequest(context, event)) {
     return response(400, { message: "Error: Invalid request" });
   }
