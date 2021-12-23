@@ -1,7 +1,7 @@
 {
-  "name": "get",
+  "name": "put",
   "version": "1.0.0",
-  "description": "GET handler for TakeNotes users API",
+  "description": "PUT handler for TakeNotes users API",
   "main": "src/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

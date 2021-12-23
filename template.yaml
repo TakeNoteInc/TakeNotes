@@ -89,11 +89,64 @@ Resources:
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           USE_DYNAMODB_LOCAL: "0"
           DYNAMODB_LOCAL_URI: ""
+          REGION: !Ref AWS::Region
       Events:
         GetUser:
           Type: Api
           Properties:
             Path: /users/{id}
+            Method: get
+            RestApiId: !Ref TakeNotesApi
+            Auth:
+              Authorizer: CognitoAuthorizer
+  GetTakeNotesUserWeeks:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: takeNotes-src/getWeeks
+      Handler: app.getWeeks
+      Tracing: Active
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref TakeNotesTable
+        - CloudWatchPutMetricPolicy: {}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TakeNotesTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          USE_DYNAMODB_LOCAL: "0"
+          DYNAMODB_LOCAL_URI: ""
+          REGION: !Ref AWS::Region
+      Events:
+        GetUser:
+          Type: Api
+          Properties:
+            Path: /users/{id}/journal/weeks/
+            Method: get
+            RestApiId: !Ref TakeNotesApi
+            Auth:
+              Authorizer: CognitoAuthorizer
+  GetTakeNotesUserWeekEntries:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: takeNotes-src/getEntries
+      Handler: app.getEntries
+      Tracing: Active
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref TakeNotesTable
+        - CloudWatchPutMetricPolicy: {}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TakeNotesTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          USE_DYNAMODB_LOCAL: "0"
+          DYNAMODB_LOCAL_URI: ""
+          REGION: !Ref AWS::Region
+      Events:
+        GetUser:
+          Type: Api
+          Properties:
+            Path: /users/{id}/journal/weeks/{weekIdx}
             Method: get
             RestApiId: !Ref TakeNotesApi
             Auth:
@@ -113,11 +166,62 @@ Resources:
           TABLE_NAME: !Ref TakeNotesTable
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           ENDPOINT_OVERRIDE: ""
+          REGION: !Ref AWS::Region
       Events:
         PostUser:
           Type: Api
           Properties:
             Path: /users/
+            Method: POST
+            RestApiId: !Ref TakeNotesApi
+            Auth:
+              Authorizer: CognitoAuthorizer
+  PostTakeNotesUserEntry:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: takeNotes-src/postEntry/
+      Handler: app.postEntry
+      Tracing: Active
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TakeNotesTable
+        - CloudWatchPutMetricPolicy: {}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TakeNotesTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
+          REGION: !Ref AWS::Region
+      Events:
+        PostEntry:
+          Type: Api
+          Properties:
+            Path: /users/{id}/journal/weeks/{weekIdx}/entries
+            Method: POST
+            RestApiId: !Ref TakeNotesApi
+            Auth:
+              Authorizer: CognitoAuthorizer
+  PostTakeNotesUserNotes:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: takeNotes-src/postNote/
+      Handler: app.postNote
+      Tracing: Active
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TakeNotesTable
+        - CloudWatchPutMetricPolicy: {}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TakeNotesTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
+          REGION: !Ref AWS::Region
+      Events:
+        PostNote:
+          Type: Api
+          Properties:
+            Path: /users/{id}/notes/
             Method: POST
             RestApiId: !Ref TakeNotesApi
             Auth:
@@ -137,6 +241,7 @@ Resources:
           TABLE_NAME: !Ref TakeNotesTable
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           ENDPOINT_OVERRIDE: ""
+          REGION: !Ref AWS::Region
       Events:
         PutUser:
           Type: Api
@@ -161,12 +266,163 @@ Resources:
           TABLE_NAME: !Ref TakeNotesTable
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           ENDPOINT_OVERRIDE: ""
+          REGION: !Ref AWS::Region
       Events:
         DeleteUser:
           Type: Api
           Properties:
             Path: /users/{id}
             Method: DELETE
+            RestApiId: !Ref TakeNotesApi
+            Auth:
+              Authorizer: CognitoAuthorizer
+  DeleteTakeNotesUserNotes:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: takeNotes-src/deleteNote/
+      Handler: app.deleteNote
+      Tracing: Active
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TakeNotesTable
+        - CloudWatchPutMetricPolicy: {}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TakeNotesTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
+          REGION: !Ref AWS::Region
+      Events:
+        DeleteNote:
+          Type: Api
+          Properties:
+            Path: /users/{id}/notes/{noteIdx}
+            Method: DELETE
+            RestApiId: !Ref TakeNotesApi
+            Auth:
+              Authorizer: CognitoAuthorizer
+  DeleteTakeNotesUserEntry:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: takeNotes-src/deleteEntry/
+      Handler: app.deleteEntry
+      Tracing: Active
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TakeNotesTable
+        - CloudWatchPutMetricPolicy: {}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TakeNotesTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
+          REGION: !Ref AWS::Region
+      Events:
+        DeleteEntry:
+          Type: Api
+          Properties:
+            Path: /users/{id}/journal/weeks/{weekIdx}/entries/{entryIdx}
+            Method: DELETE
+            RestApiId: !Ref TakeNotesApi
+            Auth:
+              Authorizer: CognitoAuthorizer
+  PutTakeNotesUserJournal:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: takeNotes-src/putJournal/
+      Handler: app.putJournal
+      Tracing: Active
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TakeNotesTable
+        - CloudWatchPutMetricPolicy: {}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TakeNotesTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
+          REGION: !Ref AWS::Region
+      Events:
+        PutJournal:
+          Type: Api
+          Properties:
+            Path: /users/{id}/journal
+            Method: PUT
+            RestApiId: !Ref TakeNotesApi
+            Auth:
+              Authorizer: CognitoAuthorizer
+  PutTakeNotesUserNotes:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: takeNotes-src/putNotes/
+      Handler: app.putNotes
+      Tracing: Active
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TakeNotesTable
+        - CloudWatchPutMetricPolicy: {}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TakeNotesTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
+          REGION: !Ref AWS::Region
+      Events:
+        PutNotes:
+          Type: Api
+          Properties:
+            Path: /users/{id}/notes/{noteIdx}
+            Method: PUT
+            RestApiId: !Ref TakeNotesApi
+            Auth:
+              Authorizer: CognitoAuthorizer
+  PutTakeNotesUserWeek:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: takeNotes-src/putWeek/
+      Handler: app.putWeek
+      Tracing: Active
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TakeNotesTable
+        - CloudWatchPutMetricPolicy: {}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TakeNotesTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
+          REGION: !Ref AWS::Region
+      Events:
+        PutWeek:
+          Type: Api
+          Properties:
+            Path: /users/{id}/journal/weeks/{weekIdx}
+            Method: PUT
+            RestApiId: !Ref TakeNotesApi
+            Auth:
+              Authorizer: CognitoAuthorizer
+  PutTakeNotesUserWeeksEntry:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: takeNotes-src/putEntry/
+      Handler: app.putEntry
+      Tracing: Active
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref TakeNotesTable
+        - CloudWatchPutMetricPolicy: {}
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref TakeNotesTable
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+          ENDPOINT_OVERRIDE: ""
+          REGION: !Ref AWS::Region
+      Events:
+        PutEntry:
+          Type: Api
+          Properties:
+            Path: /users/{id}/journal/weeks/{weekIdx}/entries/{entryIdx}
+            Method: PUT
             RestApiId: !Ref TakeNotesApi
             Auth:
               Authorizer: CognitoAuthorizer
@@ -185,6 +441,7 @@ Resources:
           TABLE_NAME: !Ref TakeNotesTable
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
           ENDPOINT_OVERRIDE: ""
+          REGION: !Ref AWS::Region
       Events:
         TestReq:
           Type: Api
@@ -230,15 +487,6 @@ Resources:
           RequireNumbers: false
           RequireSymbols: false
           RequireUppercase: true
-      Schema:
-        - Name: startDate
-          Mutable: true
-          AttributeDataType: String
-        - Name: endDate
-          Mutable: true
-          AttributeDataType: String
-      LambdaConfig:
-        PostConfirmation: !GetAtt PostTakeNotesUser.Arn
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
@@ -267,13 +515,6 @@ Resources:
         - - !Ref CognitoDomainName
           - !Ref AWS::StackName
       UserPoolId: !Ref UserPool
-  UserPoolToPostTakeNotesUserPermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !GetAtt PostTakeNotesUser.Arn
-      Principal: cognito-idp.amazonaws.com
-      Action: lambda:InvokeFunction
-      SourceArn: !GetAtt UserPool.Arn
 Outputs:
   TakeNotesFunctionApi:
     Description: API Gateway endpoint URL.
@@ -284,6 +525,9 @@ Outputs:
   CognitoClientID:
     Description: The Cognito UserPool Client ID
     Value: !Ref UserPoolClient
+  Region:
+    Description: The region env variable
+    Value: !Ref AWS::Region
   CognitoDomainName:
     Description: The Cognito Hosted UI Domain Name
     Value: !Join

@@ -14,58 +14,53 @@ if (ENDPOINT_OVERRIDE !== "") {
 const docClient = new AWS.DynamoDB.DocumentClient(options);
 
 // response helper
-const response = (statusCode, body, additionalHeaders) => ({
+const response = (statusCode, body) => ({
   statusCode,
   body: JSON.stringify(body),
   headers: {
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",
-    ...additionalHeaders,
   },
 });
 
+//valid request check
 function isValidRequest(context, event) {
-  let isIdValid =
+  return (
     event !== null &&
     event.pathParameters !== null &&
-    event.pathParameters.id !== null;
-
-  let body = event.body;
-  let isBodyValid = body !== null && body.docBody !== null;
-
-  return isIdValid && isBodyValid;
+    event.pathParameters.id !== null
+  );
 }
 
-function updateRecord(recordId, eventBody) {
-  let d = new Date();
-  eventBody.docBody.id = recordId; // Preserve ID
-  const params = {
+//get item for db and return only entries for given week property
+function getRecordById(recordId, weekIdx) {
+  console.log("setting up params...");
+  let params = {
     TableName: TABLE_NAME,
     Key: {
       id: recordId,
     },
-    UpdateExpression: "set updated = :u, docBody = :d",
-    ExpressionAttributeValues: {
-      ":u": d.toISOString(),
-      ":d": eventBody.docBody,
-    },
-    ReturnValues: "ALL_NEW",
+    ProjectionExpression: `docBody.journal.weeks[${weekIdx}]`,
   };
-
-  return docClient.update(params);
+  console.log("params: " + params);
+  return docClient.get(params);
 }
 
 // Lambda Handler
-exports.putUser = async (event, context, callback) => {
+exports.getEntries = async (event, context, callback) => {
   if (!isValidRequest(context, event)) {
     return response(400, { message: "Error: Invalid request" });
   }
 
   try {
-    let data = await updateRecord(
+    console.log("id: " + event.pathParameters.id);
+    let data = await getRecordById(
       event.pathParameters.id,
-      JSON.parse(event.body)
+      event.pathParameters.weekIdx
     ).promise();
+    if (data === null || data === undefined) {
+      return response(404, { message: "Record not found" });
+    }
     return response(200, data);
   } catch (err) {
     return response(400, { message: err.message });

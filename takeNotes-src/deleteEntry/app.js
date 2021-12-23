@@ -1,6 +1,7 @@
 // default imports
 const AWS = require("aws-sdk");
 const DDB = new AWS.DynamoDB({ apiVersion: "2012-10-08" });
+const { v4: uuidv4 } = require("uuid");
 
 // environment variables
 const { TABLE_NAME, ENDPOINT_OVERRIDE, REGION } = process.env;
@@ -28,35 +29,40 @@ function isValidRequest(context, event) {
   let isIdValid =
     event !== null &&
     event.pathParameters !== null &&
-    event.pathParameters.id !== null;
+    event.pathParameters.id !== null &&
+    event.pathParameters.weekIdx !== null &&
+    event.pathParameters.entryIdx !== null;
 
-  let body = event.body;
-  let isBodyValid = body !== null && body.docBody !== null;
-
-  return isIdValid && isBodyValid;
+  return isIdValid;
 }
 
-function updateRecord(recordId, eventBody) {
+function updateRecord(recordId, weekIdx, entryIdx) {
   let d = new Date();
-  eventBody.docBody.id = recordId; // Preserve ID
+  console.log("record id: " + recordId + " entryIdx: " + entryIdx);
+
   const params = {
     TableName: TABLE_NAME,
     Key: {
       id: recordId,
     },
-    UpdateExpression: "set updated = :u, docBody = :d",
+    UpdateExpression: `SET updated = :u, 
+                       docBody.journal.weeks[${weekIdx}].updated = :u
+                       REMOVE docBody.journal.weeks[${weekIdx}].entries.#entryId`,
+    ExpressionAttributeNames: { "#entryId": entryIdx },
     ExpressionAttributeValues: {
       ":u": d.toISOString(),
-      ":d": eventBody.docBody,
     },
+    ConditionExpression: `attribute_exists(docBody.journal.weeks[${weekIdx}].entries.#entryId)`,
     ReturnValues: "ALL_NEW",
   };
-
+  console.log("params: " + params);
   return docClient.update(params);
 }
 
 // Lambda Handler
-exports.putUser = async (event, context, callback) => {
+exports.deleteEntry = async (event, context, callback) => {
+  console.log("event: " + event);
+  console.log("body: " + event.body);
   if (!isValidRequest(context, event)) {
     return response(400, { message: "Error: Invalid request" });
   }
@@ -64,10 +70,11 @@ exports.putUser = async (event, context, callback) => {
   try {
     let data = await updateRecord(
       event.pathParameters.id,
-      JSON.parse(event.body)
+      event.pathParameters.weekIdx,
+      event.pathParameters.entryIdx
     ).promise();
     return response(200, data);
   } catch (err) {
-    return response(400, { message: err.message });
+    return response(500, { message: err.message });
   }
 };

@@ -28,35 +28,39 @@ function isValidRequest(context, event) {
   let isIdValid =
     event !== null &&
     event.pathParameters !== null &&
-    event.pathParameters.id !== null;
+    event.pathParameters.id !== null &&
+    event.pathParameters.weekIdx !== null;
 
   let body = event.body;
-  let isBodyValid = body !== null && body.docBody !== null;
+  let isBodyValid = body !== null && body.week !== null;
 
   return isIdValid && isBodyValid;
 }
 
-function updateRecord(recordId, eventBody) {
+function updateRecord(recordId, weekIdx, eventBody) {
   let d = new Date();
-  eventBody.docBody.id = recordId; // Preserve ID
+  let week = eventBody.week;
+  week.updated = d.toISOString(); // Updated timestamp in week
   const params = {
     TableName: TABLE_NAME,
     Key: {
       id: recordId,
     },
-    UpdateExpression: "set updated = :u, docBody = :d",
+    UpdateExpression: "set updated = :u, docBody.journal.weeks["+weekIdx+"] = :w",
     ExpressionAttributeValues: {
       ":u": d.toISOString(),
-      ":d": eventBody.docBody,
+      ":w": week,
     },
     ReturnValues: "ALL_NEW",
   };
+  console.log("Week update params");
+  console.log(params);
 
   return docClient.update(params);
 }
 
 // Lambda Handler
-exports.putUser = async (event, context, callback) => {
+exports.putWeek = async (event, context, callback) => {
   if (!isValidRequest(context, event)) {
     return response(400, { message: "Error: Invalid request" });
   }
@@ -64,10 +68,11 @@ exports.putUser = async (event, context, callback) => {
   try {
     let data = await updateRecord(
       event.pathParameters.id,
+      event.pathParameters.weekIdx,
       JSON.parse(event.body)
     ).promise();
     return response(200, data);
   } catch (err) {
-    return response(400, { message: err.message });
+    return response(500, { message: err.message });
   }
 };

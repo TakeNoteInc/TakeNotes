@@ -1,5 +1,5 @@
 // default imports
-const AWS = require('aws-sdk');
+const AWS = require("aws-sdk");
 const DDB = new AWS.DynamoDB({ apiVersion: "2012-10-08" });
 
 // environment variables
@@ -8,49 +8,60 @@ const options = { region: REGION };
 AWS.config.update({ region: REGION });
 
 if (ENDPOINT_OVERRIDE !== "") {
-    options.endpoint = ENDPOINT_OVERRIDE;
+  options.endpoint = ENDPOINT_OVERRIDE;
 }
 
 const docClient = new AWS.DynamoDB.DocumentClient(options);
 
 // response helper
 const response = (statusCode, body) => ({
-    statusCode,
-    body: JSON.stringify(body),
-    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+  statusCode,
+  body: JSON.stringify(body),
+  headers: {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+  },
 });
 
 function isValidRequest(context, event) {
-    return (event !== null) &&
-        (event.pathParameters !== null) &&
-        (event.pathParameters.id !== null);
+  return (
+    event !== null &&
+    event.pathParameters !== null &&
+    event.pathParameters.id !== null
+  );
 }
 
 function getRecordById(recordId) {
-    let params = {
-        TableName: TABLE_NAME,
-        Key: {
-            "id": recordId
-        }
-    };
+  let params = {
+    TableName: TABLE_NAME,
+    Key: {
+      id: recordId,
+    },
+  };
 
-    return docClient.get(params);
+  return docClient.get(params);
 }
+
+const isEmpty = value =>
+  value === undefined ||
+  value === null ||
+  (typeof value === "object" && Object.keys(value).length === 0) ||
+  (typeof value === "string" && value.trim().length === 0);
 
 // Lambda Handler
 exports.getUser = async (event, context, callback) => {
-        if (!isValidRequest(context, event)) {
-            return response(400, { message: "Error: Invalid request" });
-        }
+  if (!isValidRequest(context, event)) {
+    return response(400, { message: "Error: Invalid request" });
+  }
 
-        try {
-            let data = await getRecordById(event.pathParameters.id).promise();
-            if (data === null || data === undefined) {
-                return response(404, { message: "Record not found" });
-            }
-            return response(200, data);
-        } catch (err) {
-            return response(400, { message: err.message });
-        }
+  try {
+    let data = await getRecordById(event.pathParameters.id).promise();
+    console.log(data);
+    if ((isEmpty(data))) {
+      return response(404, { message: "Record not found" });
     }
-
+    return response(200, data);
+  } catch (err) {
+    return response(400, { message: err.message });
+  }
+};

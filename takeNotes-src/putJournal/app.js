@@ -31,23 +31,22 @@ function isValidRequest(context, event) {
     event.pathParameters.id !== null;
 
   let body = event.body;
-  let isBodyValid = body !== null && body.docBody !== null;
+  let isBodyValid = body !== null && body.journal !== null;
 
   return isIdValid && isBodyValid;
 }
 
 function updateRecord(recordId, eventBody) {
   let d = new Date();
-  eventBody.docBody.id = recordId; // Preserve ID
   const params = {
     TableName: TABLE_NAME,
     Key: {
       id: recordId,
     },
-    UpdateExpression: "set updated = :u, docBody = :d",
+    UpdateExpression: "set updated = :u, docBody.journal = :j",
     ExpressionAttributeValues: {
       ":u": d.toISOString(),
-      ":d": eventBody.docBody,
+      ":j": eventBody.journal
     },
     ReturnValues: "ALL_NEW",
   };
@@ -56,7 +55,7 @@ function updateRecord(recordId, eventBody) {
 }
 
 // Lambda Handler
-exports.putUser = async (event, context, callback) => {
+exports.putJournal = async (event, context, callback) => {
   if (!isValidRequest(context, event)) {
     return response(400, { message: "Error: Invalid request" });
   }
